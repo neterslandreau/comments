@@ -24,7 +24,7 @@ class FetchDataFlatCell extends Cell
      */
     public function display()
     {
-        $this->loadModel('Comments.Comments');
+        $this->set('display', 'hello');
 
     }
 }
