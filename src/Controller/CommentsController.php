@@ -1,7 +1,7 @@
 <?php
 namespace Comments\Controller;
 
-use Comments\Controller\AppController;
+use Comments\Controller\CommentsAppController;
 
 /**
  * Comments Controller
