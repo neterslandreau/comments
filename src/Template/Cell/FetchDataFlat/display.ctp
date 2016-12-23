@@ -1,4 +1,6 @@
 <!-- src/Template/Cell/FetchDataFlat/display.ctp -->
+<?php foreach ($comments as $comment) : ?>
 <div class="notification-icon">
-    <?= $display ?> world!
+    <?= $comment->title ?>
 </div>
+<?php endforeach; ?>

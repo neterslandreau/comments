@@ -1,6 +1,8 @@
 <!-- src/Template/Comments/index.ctp -->
 <?php
-echo $this->cell('FetchDataFlat');
+/* */
+echo $this->cell('Comments.FetchDataFlat');
+/* */
 ?>
 <nav class="large-3 medium-4 columns" id="actions-sidebar">
     <ul class="side-nav">

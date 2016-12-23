@@ -8,7 +8,7 @@ use Comments\Controller\AppController;
  *
  * @property \Comments\Model\Table\CommentsTable $Comments
  */
-class CommentsController extends AppController
+class CommentsController extends CommentsAppController
 {
 
     /**
