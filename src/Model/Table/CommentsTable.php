@@ -41,9 +41,10 @@ class CommentsTable extends Table
         $this->table('comments');
         $this->displayField('title');
         $this->primaryKey('id');
+//        $this->alias('comments');
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Comments.Commentable');
+//        $this->addBehavior('Comments.Commentable', []);
 
         $this->belongsTo('ParentComment', [
             'className' => 'Comments.Comment',

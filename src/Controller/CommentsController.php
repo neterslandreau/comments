@@ -1,15 +1,76 @@
 <?php
 namespace Comments\Controller;
 
-use Comments\Controller\CommentsAppController;
+use Cake\ORM\TableRegistry;
+
+//use App\Controller\AppController;
+//use Comments\Controller\AppController as AppController;
 
 /**
  * Comments Controller
  *
  * @property \Comments\Model\Table\CommentsTable $Comments
  */
-class CommentsController extends CommentsAppController
+class CommentsController extends AppController
 {
+
+    /**
+     * Name
+     *
+     * @var string
+     */
+    public $name = 'Comments';
+
+    /**
+     * Components
+     *
+     * @var array
+     *
+    public $components = array(
+        'RequestHandler',
+        'Paginator',
+        'Comments.Comments' => array(
+            'active' => false,
+        ),
+    );
+
+    /**
+     * Helpers
+     *
+     * @var array
+     */
+    public $helpers = array(
+        'Text',
+        'Time'
+    );
+
+    /**
+     * Uses
+     *
+     * @var array
+     */
+    public $uses = array(
+        'Comments.Comments'
+    );
+
+    /**
+     * Preset for search views
+     *
+     * @var array
+     */
+    public $presetVars = array();
+
+    /**
+     *
+     */
+    public function initialize()
+    {
+        parent::initialize();
+        $this->loadComponent('RequestHandler');
+        $this->loadComponent('Paginator');
+        $this->loadComponent('Comments.Comments', ['active' => false]);
+        $this->Comments = TableRegistry::get($this->modelClass);
+    }
 
     /**
      * Index method

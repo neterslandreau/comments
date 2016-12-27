@@ -3,6 +3,9 @@ namespace Comments\Controller\Component;
 
 use Cake\Controller\Component;
 use Cake\Controller\ComponentRegistry;
+use Cake\ORM\TableRegistry;
+use Cake\Utility\Inflector;
+use Cake\Event\Event;
 
 /**
  * Comments component
@@ -190,10 +193,11 @@ class CommentsComponent extends Component
     /**
      * Initialize Callback
      *
-     * @param Controller $controller
+     * @param array $config
      * @return void
      */
-    public function initialize(Controller $controller) {
+    public function initialize(array $config) {
+        $controller = $this->_registry->getController();
         $this->Controller = $controller;
         if (empty($this->Cookie) && !empty($this->Controller->Cookie)) {
             $this->Cookie = $this->Controller->Cookie;
@@ -207,14 +211,26 @@ class CommentsComponent extends Component
         if (!$this->active) {
             return;
         }
-
+        $model = TableRegistry::get($controller->modelClass);
         $this->modelName = $controller->modelClass;
-        $this->modelAlias = $controller->{$this->modelName}->alias;
+        $this->modelAlias = $model->alias();
         $this->viewVariable = Inflector::variable($this->modelName);
-        $controller->helpers = array_merge($controller->helpers, array('Comments.CommentWidget', 'Time', 'Comments.Cleaner', 'Comments.Tree'));
-        if (!$controller->{$this->modelName}->Behaviors->attached('Commentable')) {
-            $controller->{$this->modelName}->Behaviors->attach('Comments.Commentable', array('userModelAlias' => $this->userModel, 'userModelClass' => $this->userModelClass));
+        $controller->helpers = array_merge($controller->helpers, [
+            'Comments.CommentWidget',
+            'Time',
+            'Comments.Cleaner',
+            'Comments.Tree'
+        ]);
+        $loadedBehaviors = $model->behaviors()->loaded();
+        if (!in_array('Commentable', $loadedBehaviors)) {
+            $model->addBehavior('Comments.Commentable', [
+                'userModelAlias' => $this->userModel,
+                'userModelClass' => $this->userModelClass
+            ]);
         }
+//        debug($model);
+//        debug($controller);
+//        die();
     }
 
     /**
@@ -222,7 +238,7 @@ class CommentsComponent extends Component
      *
      * @param Controller $controller
      * @return void
-     */
+     *
     public function startup(Controller $controller) {
         $this->Controller = $controller;
         if (!$this->active) {
@@ -248,10 +264,10 @@ class CommentsComponent extends Component
     /**
      * Callback
      *
-     * @param Controller $controller
+     * @param Event $event
      * @return void
      */
-    public function beforeRender(Controller $controller) {
+    public function beforeRender(Event $event) {
         try {
             if ($this->active && in_array($this->Controller->request->action, $this->actionNames)) {
                 $type = $this->_call('initType');
