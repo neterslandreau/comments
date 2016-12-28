@@ -4,7 +4,7 @@ namespace Comments\Controller;
 use Cake\ORM\TableRegistry;
 
 //use App\Controller\AppController;
-//use Comments\Controller\AppController as AppController;
+use Comments\Controller\AppController;
 
 /**
  * Comments Controller
@@ -20,19 +20,6 @@ class CommentsController extends AppController
      * @var string
      */
     public $name = 'Comments';
-
-    /**
-     * Components
-     *
-     * @var array
-     *
-    public $components = array(
-        'RequestHandler',
-        'Paginator',
-        'Comments.Comments' => array(
-            'active' => false,
-        ),
-    );
 
     /**
      * Helpers

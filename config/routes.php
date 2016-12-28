@@ -10,3 +10,12 @@ Router::plugin(
         $routes->fallbacks(DashedRoute::class);
     }
 );
+
+Router::prefix('admin', function ($routes) {
+    $routes->plugin(
+        'Comments',
+        ['path' => '/comments'],
+        function (RouteBuilder $routes) {
+            $routes->fallbacks(DashedRoute::class);
+    });
+});
