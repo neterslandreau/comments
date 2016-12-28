@@ -3,6 +3,7 @@ namespace Comments\Controller\Admin;
 
 use Comments\Controller\AppController;
 use Cake\ORM\TableRegistry;
+use Cake\Utility\Hash;
 
 class CommentsController extends AppController
 {
@@ -58,31 +59,56 @@ class CommentsController extends AppController
      * @return void
      */
     public function index($type = '') {
-        $this->Comments->recursive = 0;
-        $this->Comments->bindModel([
-            'belongsTo' => [
-                'UserModel' => [
-                    'className' => 'Users.User',
-                    'foreignKey' => 'user_id'
-                ]
-            ]
-        ], false);
-        $conditions = array();
-        $this->Paginator->settings = array(
-            'Comment' => [
-                'conditions' => $conditions,
-                'contain' => [
-                    'UserModel'
-                ],
-                'order' => 'Comment.created DESC'
-            ]
-        );
-        if ($type == 'spam') {
-            $this->Paginator->settings['Comments']['conditions'] = array('Comments.is_spam' => array('spam', 'spammanual'));
-        } elseif ($type == 'clean') {
-            $this->Paginator->settings['Comments']['conditions'] = array('Comments.is_spam' => array('ham', 'clean'));
-        }
-        $this->set('comments', $this->Paginator->paginate('Comments'));
+//        $this->Comments->find('all');
+//        $this->Comments->recursive = 0;
+//        $this->Comments->bindModel([
+//            'belongsTo' => [
+//                'UserModel' => [
+//                    'className' => 'Users.User',
+//                    'foreignKey' => 'user_id'
+//                ]
+//            ]
+//        ], false);
+//        $conditions = [];
+//        $this->Paginator->settings = [
+//            'Comment' => [
+//                'conditions' => $conditions,
+//                'contain' => [
+//                    'UserModel'
+//                ],
+//                'order' => 'Comment.created DESC'
+//            ]
+//        ];
+//        if ($type == 'spam') {
+//            $this->Paginator->settings['Comments']['conditions'] = ['Comments.is_spam' => ['spam', 'spammanual']];
+//        } elseif ($type == 'clean') {
+//            $this->Paginator->settings['Comments']['conditions'] = ['Comments.is_spam' => ['ham', 'clean']];
+//        }
+//        $this->set('comments', $this->Paginator->paginate($this->Comments));
+        $comments = $this->paginate($this->Comments);
+//        debug($this->modelClass);
+
+        $this->set(compact('comments'));
+        $this->set('_serialize', ['comments']);
     }
 
+    /**
+     * Processes mailbox folders
+     *
+     * @param string $folder Name of the folder to process
+     * @return void
+     */
+    public function process($type = null) {
+        if (!empty($this->request->data)) {
+            try {
+                $message = $this->Comment->process($this->request->data['Comment']['action'], $this->request->data);
+            } catch (Exception $e) {
+                $message = $e->getMessage();
+            }
+            $this->Comments->flash($message);
+        }
+        $url = array('plugin' => 'comments', 'action' => 'index', 'admin' => true);
+        $url = Hash::merge($url, $this->request->params['pass']);
+        $this->redirect(Hash::merge($url, $this->request->params['named']));
+    }
 }

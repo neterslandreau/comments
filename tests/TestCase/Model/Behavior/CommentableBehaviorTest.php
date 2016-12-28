@@ -2,8 +2,9 @@
 namespace Comments\Test\TestCase\Model\Behavior;
 
 use Cake\TestSuite\TestCase;
+use Cake\ORM\Table;
+use Cake\ORM\TableRegistry;
 use Comments\Model\Behavior\CommentableBehavior;
-use Comments\Model\Table\CommentTable;
 
 /**
  * Comments\Model\Behavior\CommentableBehavior Test Case
@@ -16,8 +17,17 @@ class CommentableBehaviorTest extends TestCase
      *
      * @var \Comments\Model\Behavior\CommentableBehavior
      */
-    public $CommentableBehavior = null;
-    public $CommentTable;
+    public $Commentable;
+
+    /**
+     * Fixtures
+     *
+     * @var array
+     */
+    public $fixtures = [
+        'plugin.comments.comments',
+        'plugin.comments.users',
+    ];
 
     /**
      * setUp method
@@ -27,9 +37,8 @@ class CommentableBehaviorTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->CommentTable = new CommentTable();
-        $this->config = [];
-        $this->CommentableBehavior = new CommentableBehavior($this->CommentTable, $this->config);
+        $table = TableRegistry::get('Comments.Comments');
+//        $table->addBehavior
     }
 
     /**
@@ -39,20 +48,69 @@ class CommentableBehaviorTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->CommentableBehavior);
+        unset($this->Commentable);
 
         parent::tearDown();
     }
 
     /**
-     * Test initial setup
+     * Test initialize method
      *
      * @return void
      */
-    public function testInitialization()
+    public function testInitialize()
     {
-        debug($this->CommentableBehavior);
+//        $this->markTestIncomplete('Not implemented yet.');
+//        debug($this->Commentable);
+    }
+
+    /**
+     * Test bindCommentsModels method
+     *
+     * @return void
+     */
+    public function testBindCommentsModels()
+    {
         $this->markTestIncomplete('Not implemented yet.');
     }
-    /* */
+
+    /**
+     * Test commentToggleApprove method
+     *
+     * @return void
+     */
+    public function testCommentToggleApprove()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test commentDelete method
+     *
+     * @return void
+     */
+    public function testCommentDelete()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test commentAdd method
+     *
+     * @return void
+     */
+    public function testCommentAdd()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
+
+    /**
+     * Test commentBeforeFind method
+     *
+     * @return void
+     */
+    public function testCommentBeforeFind()
+    {
+        $this->markTestIncomplete('Not implemented yet.');
+    }
 }
