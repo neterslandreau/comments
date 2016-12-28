@@ -233,10 +233,10 @@ class CommentsComponent extends Component
     /**
      * Callback
      *
-     * @param Controller $controller
      * @return void
-     *
-    public function startup(Controller $controller) {
+     */
+    public function startup() {
+        $controller = $this->_registry->getController();
         $this->Controller = $controller;
         if (!$this->active) {
             return;
