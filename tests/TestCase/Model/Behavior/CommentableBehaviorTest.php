@@ -4,7 +4,7 @@ namespace Comments\Test\TestCase\Model\Behavior;
 use Cake\TestSuite\TestCase;
 use Comments\Model\Behavior\CommentableBehavior;
 use Cake\ORM\TableRegistry;
-//use Comments\Model\Entity\Comment;
+use Comments\Model\Entity\Comment;
 //use Comments\Model\Model;
 
 /**
@@ -34,9 +34,8 @@ class CommentableBehaviorTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->commentsTable = TableRegistry::get('Comments.Comments');
-//        var_dump($this->commentsTable);
-        $this->CommentableBehavior = new CommentableBehavior($this->commentsTable);
+        $this->Comments = TableRegistry::get('Comments.Comments');
+        $this->CommentableBehavior = new CommentableBehavior($this->Comments);
     }
 
     /**
@@ -47,7 +46,7 @@ class CommentableBehaviorTest extends TestCase
     public function tearDown()
     {
         unset($this->CommentableBehavior);
-
+        unset($this->Comments);
         parent::tearDown();
     }
 
@@ -59,13 +58,25 @@ class CommentableBehaviorTest extends TestCase
     public function testCommentToggleApprove()
     {
         $commentId = '00000000-0000-0000-0000-000000000001';
-        $table = TableRegistry::get('Comments.Comments');
-//        die(var_dump($table));
-//        $comment = $this->commentsTable->get($commentId);
-//        var_dump($comment);
-        $rtn = $table->commentToggleApprove($table, $commentId);
+        $foreignKey = $this->Comments->get($commentId)->foreignKey;
+        $assocTable = TableRegistry::get($this->Comments->get($commentId)->model);
+        $assocData = $assocTable->get($foreignKey);
+        $origCnt = $assocData->comments;
+        $rtn = $this->Comments->commentToggleApprove($this->Comments, $commentId);
+        $this->assertTrue($rtn);
 
-        $this->markTestIncomplete('Not implemented yet.');
+        $assocTable = TableRegistry::get($this->Comments->get($commentId)->model);
+        $assocData = $assocTable->get($foreignKey);
+        $newCnt = $assocData->comments;
+        $this->assertEquals($newCnt, $origCnt + 1);
+
+        $rtn = $this->Comments->commentToggleApprove($this->Comments, $commentId);
+        $assocTable = TableRegistry::get($this->Comments->get($commentId)->model);
+        $assocData = $assocTable->get($foreignKey);
+        $thrdCnt = $assocData->comments;
+        $this->assertTrue($rtn);
+        $this->assertEquals($thrdCnt, $newCnt - 1);
+
     }
 
     /**
@@ -75,21 +86,33 @@ class CommentableBehaviorTest extends TestCase
      */
     public function testCommentDelete()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $commentId = '00000000-0000-0000-0000-000000000001';
+
+        $cnt = count($this->Comments->find()->toArray());
+        $rtn = $this->Comments->commentDelete($this->Comments, $commentId);
+        $this->assertTrue($rtn);
+        $ncnt = count($this->Comments->find()->toArray());
+        $this->assertEquals($ncnt, $cnt - 1);
+
     }
 
     /**
      * Test commentAdd method
      *
      * @return void
-     */
+     *
     public function testCommentAdd()
     {
-//        $id = '00000000-0000-0000-0000-000000000001';
-//        $comment = $this->Comments->get($id, ['contain' => ['Users']]);
-//        debug($comment);
+        $id = '00000000-0000-0000-0000-000000000001';
+        $comment = $this->Comments->get($id, ['contain' => ['Users']]);
+        debug($comment->foreignKey);
+        $options = [
+            'permalink' => $comment->permalink,
+            'modelId' => $comment->foreignKey
 
-//        $rtn = $this->Comments->commentAdd($comment);
+        ];
+
+//        $rtn = $this->Comments->commentAdd($comment, $comment->id, $options);
 
         $this->markTestIncomplete('Not implemented yet.');
     }
@@ -98,9 +121,10 @@ class CommentableBehaviorTest extends TestCase
      * Test commentBeforeFind method
      *
      * @return void
-     */
+     *
     public function testCommentBeforeFind()
     {
         $this->markTestIncomplete('Not implemented yet.');
     }
+    /* */
 }

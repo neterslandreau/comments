@@ -49,7 +49,17 @@ class ArticlesFixture extends TestFixture
             'created' => '2016-12-29 13:50:31',
             'modified' => '2016-12-29 13:50:31',
             'slug' => 'Lorem ipsum dolor sit amet',
-            'comments' => 1
+            'comments' => 5
+        ],
+        [
+            'id' => '00000000-0000-0000-0000-000000000002',
+            'user_id' => 'Lorem ipsum dolor sit amet',
+            'title' => 'Lorem ipsum dolor sit amet',
+            'body' => 'Lorem ipsum dolor sit amet, aliquet feugiat. Convallis morbi fringilla gravida, phasellus feugiat dapibus velit nunc, pulvinar eget sollicitudin venenatis cum nullam, vivamus ut a sed, mollitia lectus. Nulla vestibulum massa neque ut et, id hendrerit sit, feugiat in taciti enim proin nibh, tempor dignissim, rhoncus duis vestibulum nunc mattis convallis.',
+            'created' => '2016-12-29 13:50:31',
+            'modified' => '2016-12-29 13:50:31',
+            'slug' => 'Lorem ipsum dolor sit amet',
+            'comments' => 5
         ],
     ];
 }

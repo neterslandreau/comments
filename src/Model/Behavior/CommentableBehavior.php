@@ -7,6 +7,7 @@ use Cake\Event\EventManager;
 use Cake\ORM\Behavior;
 use Cake\ORM\Entity;
 use Cake\ORM\Table;
+use Cake\ORM\TableRegistry;
 //use Comments\Model\Table\CommentsTable;
 use Cake\ORM\Query;
 use Cake\Utility\Inflector;
@@ -65,32 +66,55 @@ class CommentableBehavior extends Behavior
      * Toggle approved field in model record and increment or decrement the associated
      * models comment count appopriately.
      *
-     * @param Table $table
+     * @param Table $commentsTable
      * @param string $commentId
      * @param array   $options
      * @return boolean
      */
     public function commentToggleApprove(Table $commentsTable, $commentId, $options = array())
     {
-//        $model->recursive = -1;
-        var_dump($commentsTable);
         $data = $commentsTable->get($commentId);
-//        die(debug($data));
         if ($data) {
-            debug('approved: '.$data->approved);
             if ($data->approved == true) {
-//                debug('approved');
-                $data->approved = false;
-//                debug('not approved');
+                $data->approved = 0;
                 $direction = 'down';
             } elseif ($data->approved == false) {
-                $data->approved = true;
+                $data->approved = 1;
                 $direction = 'up';
             }
-            debug('new data: '.$data);
+
             if ($commentsTable->save($data)) {
-//                $this->changeCommentCount($table, $data->foreignKey, $direction);
-//                return true;
+                $assocTable = TableRegistry::get($data->model);
+                $this->changeCommentCount($assocTable, $data->foreignKey, $direction);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Increment or decrement the comment count cache on the associated model
+     *
+     * @param Table $table Associated table to change count of
+     * @param mixed  $id The id to change count of
+     * @param string $direction 'up' or 'down'
+     * @return null
+     */
+    public function changeCommentCount($table, $id = null, $direction = 'up') {
+        $data = $table->get($id);
+        $cnt = $data->comments;
+        if ($table->hasField('comments')) {
+            if ($direction == 'up') {
+                $cnt++;
+            } elseif ($direction == 'down') {
+                $cnt--;
+            }
+            $table->id = $id;
+            if (!is_null($direction) && $table->exists([true])) {
+                return $table->updateAll(
+                    [$table->alias() . '.comments' => $cnt],
+                    [$table->alias() . '.id' => $id]
+                );
             }
         }
         return false;
@@ -99,13 +123,14 @@ class CommentableBehavior extends Behavior
     /**
      * Delete comment
      *
-     * @param Entity $entity
+     * @param Table $table
      * @param string $commentId
      * @return boolean
      */
-    public function commentDelete(Entity $entity, $commentId = null)
+    public function commentDelete(Table $table, $commentId = null)
     {
-        return $entity->delete($commentId);
+        $entity = $table->get($commentId);
+        return $table->delete($entity);
     }
 
     /**
@@ -136,11 +161,11 @@ class CommentableBehavior extends Behavior
         }
         if (!empty($commentId)) {
             $entity->id = $commentId;
-            if (!$entity->find('count', [
+            if (!$entity->get('count', [
                 'conditions' => [
-                    'Comment.id' => $commentId,
-                    'Comment.approved' => true,
-                    'Comment.foreign_key' => $modelId
+                    'Comments.id' => $commentId,
+                    'Comments.approved' => true,
+                    'Comments.foreign_key' => $modelId
                 ]
             ])) {
                 throw new BlackHoleException(__d('comments', 'Unallowed comment id', true));
@@ -173,18 +198,18 @@ class CommentableBehavior extends Behavior
                 $data = $event->result;
             }
             $entity->create($data);
-//            if ($Model->Comment->Behaviors->enabled('Tree')) {
-//                if (isset($data['Comment']['foreign_key'])) {
-//                    $fk = $data['Comment']['foreign_key'];
-//                } elseif (isset($data['foreign_key'])) {
-//                    $fk = $data['foreign_key'];
-//                } else {
-//                    $fk = null;
-//                }
-//                $Model->Comment->Behaviors->load('Tree', array(
-//                        'scope' => array('Comment.foreign_key' => $fk))
-//                );
-//            }
+            if ($Model->Comment->Behaviors->enabled('Tree')) {
+                if (isset($data['Comment']['foreign_key'])) {
+                    $fk = $data['Comment']['foreign_key'];
+                } elseif (isset($data['foreign_key'])) {
+                    $fk = $data['foreign_key'];
+                } else {
+                    $fk = null;
+                }
+                $Model->Comment->Behaviors->load('Tree', array(
+                        'scope' => array('Comment.foreign_key' => $fk))
+                );
+            }
             if ($entity->save()) {
                 $id = $entity->id;
                 $data['Comment']['id'] = $id;
@@ -206,33 +231,6 @@ class CommentableBehavior extends Behavior
     }
 
     /**
-     * Increment or decrement the comment count cache on the associated model
-     *
-     * @param Table $table Associated table to change count of
-     * @param mixed  $id The id to change count of
-     * @param string $direction 'up' or 'down'
-     * @return null
-     */
-    public function changeCommentCount($table, $id = null, $direction = 'up') {
-        if ($table->hasField('comments')) {
-            if ($direction == 'up') {
-                $direction = '+ 1';
-            } elseif ($direction == 'down') {
-                $direction = '- 1';
-            } else {
-                $direction = null;
-            }
-            $table->id = $id;
-            if (!is_null($direction) && $table->exists(true)) {
-                return $table->updateAll(
-                    array($table->alias . '.comments' => $table->alias . '.comments ' . $direction),
-                    array($table->alias . '.id' => $id));
-            }
-        }
-        return false;
-    }
-
-    /**
      * Prepare models association to before fetch data
      *
      * @param Event $event
@@ -241,6 +239,6 @@ class CommentableBehavior extends Behavior
      */
     public function commentBeforeFind(Event $event, EntityInterface $entity)
     {
-        return true;
+        return [];
     }
 }
