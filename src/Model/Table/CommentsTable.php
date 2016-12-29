@@ -46,8 +46,8 @@ class CommentsTable extends Table
         $this->addBehavior('Timestamp');
         $this->addBehavior('Comments.Commentable', []);
 
-        $this->belongsTo('ParentComment', [
-            'className' => 'Comments.Comment',
+        $this->belongsTo('ParentComments', [
+            'className' => 'Comments.Comments',
             'foreignKey' => 'parent_id'
         ]);
         $this->belongsTo('Users', [
@@ -56,14 +56,8 @@ class CommentsTable extends Table
             'className' => 'Users'
         ]);
         $this->hasMany('ChildComment', [
-            'className' => 'Comments.Comment',
+            'className' => 'Comments.Comments',
             'foreignKey' => 'parent_id'
-        ]);
-        $this->belongsToMany('Phinxlog', [
-            'foreignKey' => 'comment_id',
-            'targetForeignKey' => 'phinxlog_id',
-            'joinTable' => 'comments_phinxlog',
-            'className' => 'Comments.Phinxlog'
         ]);
     }
 
@@ -139,7 +133,7 @@ class CommentsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['parent_id'], 'ParentComment'));
+        $rules->add($rules->existsIn(['parent_id'], 'ParentComments'));
         $rules->add($rules->existsIn(['user_id'], 'Users'));
 
         return $rules;
