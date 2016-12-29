@@ -53,10 +53,10 @@ class CommentsFixture extends TestFixture
      */
     public $records = [
         [
-            'id' => '8e4f2b2c-20d9-4e0b-80f5-50bde2195e78',
-            'parent_id' => '4c1342bd-1e4e-4f58-869e-48899ac32ce7',
-            'foreignKey' => 'ae91bb91-1fdf-44bd-ab3f-72c55be7abee',
-            'user_id' => '854ea630-0b63-4b5f-9461-6de74b7009b8',
+            'id' => '00000000-0000-0000-0000-000000000001',
+            'parent_id' => '00000000-0000-0000-0000-000000000001',
+            'foreignKey' => '00000000-0000-0000-0000-000000000001',
+            'user_id' => '00000000-0000-0000-0000-000000000001',
             'lft' => 1,
             'rght' => 2,
             'model' => 'Lorem ipsum dolor sit amet',

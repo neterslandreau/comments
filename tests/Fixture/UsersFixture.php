@@ -50,8 +50,8 @@ class UsersFixture extends TestFixture
      */
     public $records = [
         [
-            'id' => '854ea630-0b63-4b5f-9461-6de74b7009b8',
-            'username' => 'Lorem ipsum dolor sit amet',
+            'id' => '00000000-0000-0000-0000-000000000001',
+            'username' => 'user1',
             'email' => 'Lorem ipsum dolor sit amet',
             'password' => 'Lorem ipsum dolor sit amet',
             'first_name' => 'Lorem ipsum dolor sit amet',
