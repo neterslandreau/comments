@@ -1,8 +1,8 @@
 <?php
 namespace Comments\Test\TestCase\Controller;
 
+use Cake\ORM\TableRegistry;
 use Cake\TestSuite\IntegrationTestCase;
-use Comments\Controller\CommentsController;
 
 /**
  * Comments\Controller\CommentsController Test Case
@@ -14,9 +14,9 @@ class CommentsControllerTest extends IntegrationTestCase
      * Fixtures
      *
      * @var array
-     *
+     */
     public $fixtures = [
-        'plugin.comments.comment'
+        'plugin.comments.comments'
     ];
 
     /**
@@ -26,7 +26,8 @@ class CommentsControllerTest extends IntegrationTestCase
      */
     public function testIndex()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/comments/comments');
+        $this->assertResponseOk();
     }
 
     /**
@@ -36,7 +37,8 @@ class CommentsControllerTest extends IntegrationTestCase
      */
     public function testView()
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->get('/comments/comments/view/00000000-0000-0000-0000-000000000001');
+        $this->assertResponseOk();
     }
 
     /**

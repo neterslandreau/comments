@@ -26,18 +26,6 @@ class CommentableBehavior extends Behavior
      * @var array
      */
     public $config = [];
-    /**
-     * Default settings
-     *
-     * @var array
-     */
-    public $defaults = array(
-        'commentEntity' => 'Comments.Comment',
-        'spamField' => 'is_spam',
-        'userModelAlias' => 'UserModel',
-        'userModelClass' => 'User',
-        'userModel' => null,
-    );
 
     /**
      * @var null
@@ -50,30 +38,31 @@ class CommentableBehavior extends Behavior
      * @var array
      */
     protected $_defaultConfig = [
-        'commentEntity' => 'Comments.Comment',
+        'commentsTable' => 'Comments.Comments',
         'spamField' => 'is_spam',
-        'userModelAlias' => 'UserModel',
-        'userModelClass' => 'User',
-        'userModel' => null,
+        'usersTableAlias' => 'UsersTable',
+        'usersTableClass' => 'Users',
+        'usersTable' => null,
     ];
 
     public function initialize(array $config)
     {
         parent::initialize($config);
+//        debug($this);
     }
 
     /**
      * Toggle approved field in model record and increment or decrement the associated
      * models comment count appopriately.
      *
-     * @param Table $commentsTable
+     * @param Table $Table
      * @param string $commentId
      * @param array   $options
      * @return boolean
      */
-    public function commentToggleApprove(Table $commentsTable, $commentId, $options = array())
+    public function commentToggleApprove(Table $Table, $commentId, $options = array())
     {
-        $data = $commentsTable->get($commentId);
+        $data = $Table->get($commentId);
         if ($data) {
             if ($data->approved == true) {
                 $data->approved = 0;
@@ -83,7 +72,7 @@ class CommentableBehavior extends Behavior
                 $direction = 'up';
             }
 
-            if ($commentsTable->save($data)) {
+            if ($Table->save($data)) {
                 $assocTable = TableRegistry::get($data->model);
                 $this->changeCommentCount($assocTable, $data->foreignKey, $direction);
                 return true;
@@ -100,20 +89,20 @@ class CommentableBehavior extends Behavior
      * @param string $direction 'up' or 'down'
      * @return null
      */
-    public function changeCommentCount($table, $id = null, $direction = 'up') {
-        $data = $table->get($id);
+    public function changeCommentCount(Table $Table, $id = null, $direction = 'up') {
+        $data = $Table->get($id);
         $cnt = $data->comments;
-        if ($table->hasField('comments')) {
+        if ($Table->hasField('comments')) {
             if ($direction == 'up') {
                 $cnt++;
             } elseif ($direction == 'down') {
                 $cnt--;
             }
-            $table->id = $id;
-            if (!is_null($direction) && $table->exists([true])) {
-                return $table->updateAll(
-                    [$table->alias() . '.comments' => $cnt],
-                    [$table->alias() . '.id' => $id]
+            $Table->id = $id;
+            if (!is_null($direction) && $Table->exists([true])) {
+                return $Table->updateAll(
+                    [$Table->alias() . '.comments' => $cnt],
+                    [$Table->alias() . '.id' => $id]
                 );
             }
         }
@@ -136,13 +125,13 @@ class CommentableBehavior extends Behavior
     /**
      * Handle adding comments
      *
-     * @param Entity $entity Object of the related model class
+     * @param Table $Table Object of the related model class
      * @param mixed $commentId parent comment id, 0 for none
      * @param array $options extra information and comment statistics
      * @throws BlackHoleException
      * @return boolean
      */
-    public function commentAdd(Entity $entity, $commentId = null, $options = array())
+    public function commentAdd(Table $Table, $commentId = null, $options = array())
     {
         $options = array_merge(
             [
@@ -157,11 +146,11 @@ class CommentableBehavior extends Behavior
 
         extract($options);
         if (isset($options['permalink'])) {
-            $entity->permalink = $options['permalink'];
+            $Table->permalink = $options['permalink'];
         }
         if (!empty($commentId)) {
-            $entity->id = $commentId;
-            if (!$entity->get('count', [
+            $Table->id = $commentId;
+            if (!$Table->get('count', [
                 'conditions' => [
                     'Comments.id' => $commentId,
                     'Comments.approved' => true,

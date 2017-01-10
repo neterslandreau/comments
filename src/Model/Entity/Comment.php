@@ -11,7 +11,7 @@ use Cake\ORM\Entity;
  * @property string $foreignKey
  * @property string $user_id
  * @property int $lft
- * @property int $right
+ * @property int $rght
  * @property string $model
  * @property bool $approved
  * @property string $title

@@ -195,7 +195,7 @@ class CommentsComponent extends Component
      *
      * @param array $config
      * @return void
-     */
+     *
     public function initialize(array $config) {
         $controller = $this->_registry->getController();
         $this->Controller = $controller;
@@ -211,6 +211,7 @@ class CommentsComponent extends Component
         if (!$this->active) {
             return;
         }
+
         $model = TableRegistry::get($controller->modelClass);
         $this->modelName = $controller->modelClass;
         $this->modelAlias = $model->alias();
@@ -234,7 +235,7 @@ class CommentsComponent extends Component
      * Callback
      *
      * @return void
-     */
+     *
     public function startup() {
         $controller = $this->_registry->getController();
         $this->Controller = $controller;
@@ -263,7 +264,7 @@ class CommentsComponent extends Component
      *
      * @param Event $event
      * @return void
-     */
+     *
     public function beforeRender(Event $event) {
         if ($this->active && in_array($this->Controller->request->action, $this->actionNames)) {
             $type = $this->_call('initType');

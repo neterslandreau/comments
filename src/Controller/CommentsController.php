@@ -2,8 +2,8 @@
 namespace Comments\Controller;
 
 use Cake\ORM\TableRegistry;
+use Cake\Event\Event;
 
-//use App\Controller\AppController;
 use Comments\Controller\AppController;
 
 /**
@@ -47,6 +47,10 @@ class CommentsController extends AppController
      */
     public $presetVars = array();
 
+    public function beforeFilter(Event $event)
+    {
+        $this->Auth->allow();
+    }
     /**
      *
      */
@@ -66,7 +70,8 @@ class CommentsController extends AppController
      */
     public function index()
     {
-        $comments = $this->paginate($this->Comments);
+//        $comments = $this->paginate($this->Comments);
+        $comments = $this->Comments->find('treeList');
 
         $this->set(compact('comments'));
         $this->set('_serialize', ['comments']);
@@ -96,19 +101,22 @@ class CommentsController extends AppController
      */
     public function add()
     {
-        $comment = $this->Comments->newEntity();
+        $this->autoRender = false;
         if ($this->request->is('post')) {
+            if (!strlen($this->request->data['parent_id'])) {
+                $this->request->data['parent_id'] = null;
+            }
+            $comment = $this->Comments->newEntity();
             $comment = $this->Comments->patchEntity($comment, $this->request->data);
             if ($this->Comments->save($comment)) {
                 $this->Flash->success(__('The comment has been saved.'));
 
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect($this->request->data['redirectUrl']);
             } else {
                 $this->Flash->error(__('The comment could not be saved. Please, try again.'));
+                return $this->redirect($this->request->data['redirectUrl']);
             }
         }
-        $this->set(compact('comment'));
-        $this->set('_serialize', ['comment']);
     }
 
     /**

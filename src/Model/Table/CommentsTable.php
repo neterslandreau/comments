@@ -44,6 +44,8 @@ class CommentsTable extends Table
 //        $this->alias('comments');
 
         $this->addBehavior('Timestamp');
+        $this->addBehavior('Tree');
+        $this->addBehavior('Sluggable');
         $this->addBehavior('Comments.Commentable', []);
 
         $this->belongsTo('ParentComments', [
@@ -79,9 +81,12 @@ class CommentsTable extends Table
             ->notEmpty('foreignKey');
 
         $validator
-            ->integer('right')
-            ->requirePresence('right', 'create')
-            ->notEmpty('right');
+            ->add('lft', 'valid', ['rule' => 'numeric'])
+            ->notEmpty('lft');
+
+        $validator
+            ->add('rght', 'valid', ['rule' => 'numeric'])
+            ->notEmpty('rght');
 
         $validator
             ->requirePresence('model', 'create')
@@ -99,7 +104,7 @@ class CommentsTable extends Table
             ->allowEmpty('slug');
 
         $validator
-            ->allowEmpty('body');
+            ->notEmpty('body');
 
         $validator
             ->allowEmpty('author_name');
