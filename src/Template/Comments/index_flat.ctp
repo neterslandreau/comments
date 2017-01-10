@@ -1,6 +1,6 @@
 <!-- src/Template/Comments/index.ctp -->
 <?php
-/* */
+/* *
 echo $this->cell('Comments.FetchDataFlat');
 /* */
 ?>
