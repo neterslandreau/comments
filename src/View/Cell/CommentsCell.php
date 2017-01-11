@@ -66,31 +66,4 @@ class CommentsCell extends Cell
         $this->set('foreignKey', $foreignKey);
         $this->set('comments', $comments);
     }
-
-    public function listChildComments($foreignKey, $model, $userId, $redirectUrl) {
-        $this->loadModel('Comments');
-        $comments = $this->Comments->find('threaded')->where(['foreignKey' => $foreignKey]);
-
-        $this->set('redirectUrl', $redirectUrl);
-        $this->set('userId', $userId);
-        $this->set('model', $model);
-        $this->set('foreignKey', $foreignKey);
-        $this->set('comments', $comments);
-    }
-
-    public function addChildComment($foreignKey, $model, $userId, $parentId, $redirectUrl)
-    {
-        $this->loadModel('Comments');
-        $comment = $this->Comments->newEntity();
-
-        $this->set('comment', $comment);
-        $this->set('foreignKey', $foreignKey);
-        $this->set('model', $model);
-        $this->set('userId', $userId);
-        $this->set('parentId', $parentId);
-        $this->set('redirectUrl', $redirectUrl);
-        $this->set('label', 'Add Child Comment');
-        $this->set('legend', 'Add Comment to comment');
-
-    }
 }
