@@ -41,6 +41,16 @@ class CommentsController extends AppController
     public $presetVars = array();
 
     /**
+     * @var array
+     */
+    public $components = [
+        'RequestHandler',
+        'Paginator',
+        'Search.Prg',
+        'Comments.Comments', ['active' => false],
+    ];
+
+    /**
      *
      */
     public function initialize()
@@ -48,6 +58,7 @@ class CommentsController extends AppController
         parent::initialize();
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Paginator');
+        $this->loadComponent('Search.Prg');
         $this->loadComponent('Comments.Comments', ['active' => false]);
         $this->Comments = TableRegistry::get($this->modelClass);
     }
@@ -59,37 +70,46 @@ class CommentsController extends AppController
      * @return void
      */
     public function index($type = '') {
-//        $this->Comments->find('all');
-//        $this->Comments->recursive = 0;
-//        $this->Comments->bindModel([
-//            'belongsTo' => [
-//                'UserModel' => [
-//                    'className' => 'Users.User',
-//                    'foreignKey' => 'user_id'
-//                ]
-//            ]
-//        ], false);
-//        $conditions = [];
-//        $this->Paginator->settings = [
-//            'Comment' => [
-//                'conditions' => $conditions,
-//                'contain' => [
-//                    'UserModel'
-//                ],
-//                'order' => 'Comment.created DESC'
-//            ]
-//        ];
-//        if ($type == 'spam') {
-//            $this->Paginator->settings['Comments']['conditions'] = ['Comments.is_spam' => ['spam', 'spammanual']];
-//        } elseif ($type == 'clean') {
-//            $this->Paginator->settings['Comments']['conditions'] = ['Comments.is_spam' => ['ham', 'clean']];
-//        }
-//        $this->set('comments', $this->Paginator->paginate($this->Comments));
-        $comments = $this->paginate($this->Comments);
-//        debug($this->modelClass);
+        $conditions = $this->_adminIndexSearch();
+//        debug($conditions);
+//        $comments = $this->Comments->find()
+//            ->where($conditions);
+
+        if ($type == 'spam') {
+            $comments = $this->Comments->find()
+                ->contain(['Users'])
+                ->where(['is_spam' => 'spam'])
+                ->orWhere(['is_spam' => 'spammanual']);
+        } elseif ($type == 'clean') {
+            $comments = $this->Comments->find()
+                ->contain(['Users'])
+                ->where(['is_spam' => 'clean'])
+                ->orWhere(['is_spam' => 'ham']);
+        }
+        $comments = $this->paginate($comments);
 
         $this->set(compact('comments'));
         $this->set('_serialize', ['comments']);
+    }
+
+    /**
+     * Checks if the CakeDC Search plugin is present and if yes loads the PRG component
+     *
+     * @return array Conditions for the pagination
+     */
+    protected function _adminIndexSearch() {
+        $conditions = array();
+        if ($this->Prg) {
+            $this->Comments->addBehavior('Search.Searchable');
+            $this->Comments->filterArgs = [
+                array('field' => 'is_spam', 'name' => 'is_spam', 'type' => 'value'),
+                array('field' => 'approved', 'name' => 'approved', 'type' => 'value')
+            ];
+            $this->Prg->commonProcess();
+            $conditions = $this->Comments->find('searchable', $this->Prg->parsedParams());
+            $this->set('searchEnabled', true);
+        }
+        return $conditions;
     }
 
     /**
@@ -101,7 +121,7 @@ class CommentsController extends AppController
     public function process($type = null) {
         if (!empty($this->request->data)) {
             try {
-                $message = $this->Comment->process($this->request->data['Comment']['action'], $this->request->data);
+                $message = $this->Comments->process($this->request->data['Comment']['action'], $this->request->data);
             } catch (Exception $e) {
                 $message = $e->getMessage();
             }

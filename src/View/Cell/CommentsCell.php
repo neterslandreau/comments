@@ -18,6 +18,8 @@ class CommentsCell extends Cell
     protected $_validCellOptions = [];
 
     /**
+     * Add a comment
+     *
      * @param $foreignKey
      * @param $model
      * @param $userId
@@ -39,16 +41,17 @@ class CommentsCell extends Cell
         $this->set('parentId', $parentId);
         $this->set('redirectUrl', $redirectUrl);
         if (!$child) {
-            $this->set('label', 'Add Top Comment');
-            $this->set('legend', 'Add Comment to Article');
+            $this->set('legend', 'Add Top Level Comment');
+            $this->set('label', 'Add Top Level Comment');
         } else {
-            $this->set('label', 'Add Child Comment');
-            $this->set('legend', 'Add Comment to comment');
-
+            $this->set('legend', 'Add Comment to Comment');
+            $this->set('label', 'Add Comment to Comment');
         }
     }
 
     /**
+     * List the comments
+     *
      * @param $foreignKey
      * @param $model
      * @param $userId
@@ -57,8 +60,7 @@ class CommentsCell extends Cell
     public function listComments($foreignKey, $model, $userId, $redirectUrl)
     {
         $this->loadModel('Comments');
-        $query = $this->Comments;
-        $comments = $query->find('threaded')->where(['foreignKey' => $foreignKey]);
+        $comments = $this->Comments->find('threaded')->where(['foreignKey' => $foreignKey]);
 
         $this->set('redirectUrl', $redirectUrl);
         $this->set('userId', $userId);

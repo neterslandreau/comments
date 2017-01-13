@@ -28,7 +28,8 @@ class CommentsController extends AppController
      */
     public $helpers = array(
         'Text',
-        'Time'
+        'Time',
+        'Html'
     );
 
     /**
@@ -50,6 +51,11 @@ class CommentsController extends AppController
     public function beforeFilter(Event $event)
     {
         $this->Auth->allow();
+    }
+
+    public function beforeRender(Event $event)
+    {
+//        $this->Html->link('Comments.comments', ['inline' => false]);
     }
     /**
      *
@@ -125,7 +131,7 @@ class CommentsController extends AppController
      * @param string|null $id Comment id.
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
-     */
+     *
     public function edit($id = null)
     {
         $comment = $this->Comments->get($id, [
@@ -151,7 +157,7 @@ class CommentsController extends AppController
      * @param string|null $id Comment id.
      * @return \Cake\Network\Response|null Redirects to index.
      * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
+     *
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);
@@ -164,4 +170,5 @@ class CommentsController extends AppController
 
         return $this->redirect(['action' => 'index']);
     }
+    /* */
 }
