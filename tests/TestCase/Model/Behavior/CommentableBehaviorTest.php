@@ -4,8 +4,35 @@ namespace Comments\Test\TestCase\Model\Behavior;
 use Cake\TestSuite\TestCase;
 use Comments\Model\Behavior\CommentableBehavior;
 use Cake\ORM\TableRegistry;
+use Cake\ORM\Table;
 use Comments\Model\Entity\Comment;
-//use Comments\Model\Model;
+use Comments\Model\Table\CommentsTable;
+
+if (!class_exists('Articles')) {
+    class ArticlesTable extends Table
+    {
+        /**
+         * Callback data
+         *
+         * @var array
+         */
+        public $callbackData = [];
+
+        /**
+         * @param array $options
+         */
+        public function initialize(array $options)
+        {
+            $this->addBehavior('Comments.Commentable', [
+                'commentsModel' => 'Comments.Comments',
+                'userModelAlias' => 'UsersTable',
+                'userModel' => 'Users'
+            ]);
+
+            $this->table('articles');
+        }
+    }
+}
 
 /**
  * Comments\Model\Behavior\CommentableBehavior Test Case
