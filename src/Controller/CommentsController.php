@@ -48,11 +48,17 @@ class CommentsController extends AppController
      */
     public $presetVars = array();
 
+    /**
+     * @param Event $event
+     *
     public function beforeFilter(Event $event)
     {
         $this->Auth->allow();
     }
 
+    /**
+     * @param Event $event
+     */
     public function beforeRender(Event $event)
     {
 //        $this->Html->link('Comments.comments', ['inline' => false]);
