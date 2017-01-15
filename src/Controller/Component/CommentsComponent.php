@@ -17,7 +17,7 @@ class CommentsComponent extends Component
      * Components
      *
      * @var array $components
-     *
+     */
     public $components = array(
         'Cookie',
         'Session',
@@ -79,7 +79,7 @@ class CommentsComponent extends Component
      *
      * @var string Association name
      */
-    public $assocName = 'Comment';
+    public $assocName = 'Comments';
 
     /**
      * Name of user model associated to comment
@@ -88,7 +88,7 @@ class CommentsComponent extends Component
      *
      * @var string Name of the user model
      */
-    public $userModel = 'UserModel';
+    public $userModel = 'Users';
 
     /**
      * Class Name for user model in ClassRegistry format.
@@ -98,7 +98,7 @@ class CommentsComponent extends Component
      *
      * @var string user model class name
      */
-    public $userModelClass = 'User';
+    public $userModelClass = 'Users.Users';
 
     /**
      * Flag if this component should permanently unbind association to Comment model in order to not
@@ -195,7 +195,7 @@ class CommentsComponent extends Component
      *
      * @param array $config
      * @return void
-     *
+     */
     public function initialize(array $config) {
         $controller = $this->_registry->getController();
         $this->Controller = $controller;
@@ -223,10 +223,12 @@ class CommentsComponent extends Component
             'Comments.Tree'
         ]);
         $loadedBehaviors = $model->behaviors()->loaded();
+
         if (!in_array('Commentable', $loadedBehaviors)) {
             $model->addBehavior('Comments.Commentable', [
                 'userModelAlias' => $this->userModel,
-                'userModelClass' => $this->userModelClass
+                'userModelClass' => $this->userModelClass,
+                'modelName' => $this->modelName
             ]);
         }
     }
@@ -235,13 +237,14 @@ class CommentsComponent extends Component
      * Callback
      *
      * @return void
-     *
+     */
     public function startup() {
         $controller = $this->_registry->getController();
         $this->Controller = $controller;
         if (!$this->active) {
             return;
         }
+
         $this->Auth = $this->Controller->Auth;
         if (!empty($this->Auth) && $this->Auth->user()) {
             $controller->set('isAuthorized', ($this->Auth->user('id') != ''));
@@ -264,14 +267,19 @@ class CommentsComponent extends Component
      *
      * @param Event $event
      * @return void
-     *
+     */
     public function beforeRender(Event $event) {
-        if ($this->active && in_array($this->Controller->request->action, $this->actionNames)) {
-            $type = $this->_call('initType');
-            $this->commentParams = array_merge($this->commentParams, array('displayType' => $type));
-            $this->_call('view', array($type));
-            $this->_call('prepareParams');
-            $this->Controller->set('commentParams', $this->commentParams);
+        try {
+            if ($this->active && in_array($this->Controller->request->action, $this->actionNames)) {
+                $type = $this->_call('initType');
+                $this->commentParams = array_merge($this->commentParams, array('displayType' => $type));
+                $this->_call('view', array($type));
+                $this->_call('prepareParams');
+                $this->Controller->set('commentParams', $this->commentParams);
+            }
+        } catch (BlackHoleException $exception) {
+            return $this->Controller->blackHole($exception->getMessage());
+        } catch (NoActionException $exception) {
         }
     }
 
@@ -312,7 +320,13 @@ class CommentsComponent extends Component
      * @return void
      */
     public function callback_view($displayType, $processActions = true) {
-        if (!isset($this->Controller->{$this->modelName}) ||
+        $table = TableRegistry::get($this->modelName);
+        debug($this->assocName);
+//        debug($table->associations()->type('hasOne'));
+//        debug($table->associations()->type('hasMany'));
+        debug(array_merge($table->associations()->type('hasOne'), $table->associations()->type('hasMany')));
+//        debug($table->associations()->type('belongsTo')[0]->name());
+        if (!is_object($table) ||
             (!array_key_exists($this->assocName, array_merge($this->Controller->{$this->modelName}->hasOne, $this->Controller->{$this->modelName}->hasMany)))) {
             throw new RuntimeException('CommentsComponent: model ' . $this->modelName . ' or association ' . $this->assocName . ' doesn\'t exist');
         }
