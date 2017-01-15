@@ -41,12 +41,10 @@ class CommentsTable extends Table
         $this->table('comments');
         $this->displayField('title');
         $this->primaryKey('id');
-//        $this->alias('comments');
 
         $this->addBehavior('Timestamp');
         $this->addBehavior('Tree');
         $this->addBehavior('Sluggable');
-        $this->addBehavior('Comments.Commentable', []);
 
         $this->belongsTo('ParentComments', [
             'className' => 'Comments.Comments',
@@ -55,7 +53,7 @@ class CommentsTable extends Table
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
-            'className' => 'Users'
+            'className' => 'Users.Users'
         ]);
         $this->hasMany('ChildComment', [
             'className' => 'Comments.Comments',
