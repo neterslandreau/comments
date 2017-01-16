@@ -38,6 +38,8 @@ class CommentableBehavior extends Behavior
         'userModel' => null,
     );
 
+    public $model = null;
+
     /**
      * Initialize behavior
      *
@@ -46,54 +48,27 @@ class CommentableBehavior extends Behavior
     public function initialize(array $config)
     {
         parent::initialize($config);
-//        debug($config);
         $model = TableRegistry::get($config['modelName']);
-//        debug($this->settings);
+
         if (!isset($this->settings[$model->alias()])) {
             $this->settings[$model->alias()] = $this->defaults;
         }
         $this->settings[$model->alias()] = array_merge($this->settings[$model->alias()], $config);
-//        debug($this->settings);
-        $this->bindCommentModels($model);
-    }
-    /**
-     * Setup
-     *
-     * @param Table $model
-     * @param array $settings
-     *
-    public function setup(Table $model, $settings = array())
-    {
-        if (!isset($this->settings[$model->alias()])) {
-            $this->settings[$model->alias()] = $this->defaults;
-        }
-        if (!is_array($settings)) {
-            $settings = (array)$settings;
-        }
-        $this->settings[$model->alias()] = array_merge($this->settings[$model->alias()], $settings);
-        $this->bindCommentModels($model);
+
+        list($this->model, $this->commentsModel) = $this->bindCommentModels($model);
     }
 
     /**
-     * Binds the commend and user model and the current model to the comments model
+     * Binds the user model and the current model to the comments model
      *
      * @param Table $model
-     * @return void
+     * @return Table $model
      */
     public function bindCommentModels(Table $model)
     {
         $config = $this->settings[$model->alias()];
-//        debug($config);
         if (!empty($config['commentModel']) && is_array($config['commentModel'])) {
             $model->hasMany('Comments', $config['commentModel']);
-//            $model->bindModel(
-//                array(
-//                    'hasMany' => array(
-//                        'Comment' => $config['commentModel']
-//                    )
-//                ),
-//                false
-//            );
         } else {
             $model->hasMany('Comments', [
                 'className' => $config['commentModel'],
@@ -110,27 +85,6 @@ class CommentableBehavior extends Behavior
                 'counterQuery' => ''
 
             ]);
-//            $model->bindModel(
-//                array(
-//                    'hasMany' => array(
-//                        'Comment' => array(
-//                            'className' => $config['commentModel'],
-//                            'foreignKey' => 'foreign_key',
-//                            'unique' => true,
-//                            'conditions' => '',
-//                            'fields' => '',
-//                            'dependent' => true,
-//                            'order' => '',
-//                            'limit' => '',
-//                            'offset' => '',
-//                            'exclusive' => '',
-//                            'finderQuery' => '',
-//                            'counterQuery' => ''
-//                        )
-//                    )
-//                ),
-//                false
-//            );
         }
         $comments = TableRegistry::get($config['commentModel']);
         $comments->belongsTo($model->alias(), [
@@ -142,31 +96,9 @@ class CommentableBehavior extends Behavior
             'counterCache' => true,
             'dependent' => false
         ]);
-//        debug($comments);
-//        $model->Comment->bindModel(array(
-//            'belongsTo' => array(
-//                $model->alias => array(
-//                    'className' => $model->name,
-//                    'foreignKey' => 'foreign_key',
-//                    'unique' => true,
-//                    'conditions' => '',
-//                    'fields' => '',
-//                    'counterCache' => true,
-//                    'dependent' => false)
-//            )
-//        ),
-//            false
-//        );
+
         if (!empty($config['userModel']) && is_array($config['userModel'])) {
             $comments->belongsTo($config['userModelAlias'], $config['userModel']);
-//            $model->bindModel(
-//                array(
-//                    'belongsTo' => array(
-//                        $config['userModelAlias'] => $config['userModel']
-//                    )
-//                ),
-//                false
-//            );
         } else {
             $comments->belongsTo($config['userModelAlias'], [
                 'className' => $config['userModelClass'],
@@ -176,22 +108,8 @@ class CommentableBehavior extends Behavior
                 'counterCache' => true,
                 'order' => '',
             ]);
-//            $model->Comment->bindModel(array(
-//                'belongsTo' => array(
-//                    $config['userModelAlias'] => array(
-//                        'className' => $config['userModelClass'],
-//                        'foreignKey' => 'user_id',
-//                        'conditions' => '',
-//                        'fields' => '',
-//                        'counterCache' => true,
-//                        'order' => '')
-//                )
-//            ),
-//                false
-//            );
         }
-//        debug($model->associations());
-//        debug($comments->associations());
+        return [$model, $comments];
     }
 
     /**
@@ -352,51 +270,67 @@ class CommentableBehavior extends Behavior
     /**
      * Prepare models association to before fetch data
      *
-     * @param Model $model
      * @param array $options
      * @return boolean
      */
-    public function commentBeforeFind(Model $model, $options)
+    public function commentBeforeFind(array $options)
     {
-        $options = array_merge(array('userModel' => $this->settings[$model->alias]['userModelAlias'], 'userData' => null, 'isAdmin' => false), (array)$options);
+        $options = array_merge(
+            [
+                'userModel' => $this->settings[$this->model->alias()]['userModelAlias'],
+                'userData' => null,
+                'isAdmin' => false
+            ],
+            (array)$options
+        );
         extract($options);
-        $model->Behaviors->disable('Containable');
-        $model->Comment->Behaviors->disable('Containable');
+
         $unbind = array();
         foreach (array('belongsTo', 'hasOne', 'hasMany', 'hasAndBelongsToMany') as $assocType) {
-            if (!empty($model->Comment->{$assocType})) {
+            if ($this->commentsModel->association($assocType)) {
                 $unbind[$assocType] = array();
-                foreach ($model->Comment->{$assocType} as $key => $assocConfig) {
+                foreach ($this->commentsModel->association($assocType) as $key => $assocConfig) {
                     $keep = false;
                     if (!empty($options['keep']) && in_array($key, $options['keep'])) {
                         $keep = true;
                     }
-                    if (!in_array($key, array($userModel, $model->alias)) && !$keep) {
+                    if (!in_array($key, array($userModel, $this->model->alias())) && !$keep) {
                         $unbind[$assocType][] = $key;
                     }
                 }
             }
         }
+
         if (!empty($unbind)) {
-            $model->Comment->unbindModel($unbind, false);
+            // @todo check this in unit test. this is wrong!
+            $this->commentsModel->associations->remove($unbind);
         }
-        $model->Comment->belongsTo[$model->alias]['fields'] = array($model->primaryKey);
-        $model->Comment->belongsTo[$userModel]['fields'] = array('id', $model->Comment->{$userModel}->displayField, 'slug');
-        $conditions = array('Comment.approved' => 1);
+
+        $this->commentsModel->addAssociations([
+            'belongsTo' => [
+                $this->model->alias() => [
+                    'fields' => [$this->model->primaryKey()]
+                ],
+                $userModel => [
+                    'fields' => ['id', '$this->commentsModel->{$userModel}->displayField()', 'slug']
+                ]
+            ]
+        ]);
+
+        $conditions = ['Comments.approved' => 1];
         if (isset($id)) {
-            $conditions[$model->alias . '.' . $model->primaryKey] = $id;
-            $conditions[$model->Comment->alias . '.model'] = $model->alias;
+            $conditions[$this->model->alias() . '.' . $this->model->primaryKey()] = $id;
+            $conditions[$this->commentsModel->alias() . '.model'] = $this->commentsModel->alias();
         }
         if ($isAdmin) {
-            unset($conditions['Comment.approved']);
+            unset($conditions['Comments.approved']);
         }
-        $model->Comment->recursive = 0;
-        $spamField = $this->settings[$model->alias]['spamField'];
-        if ($model->Comment->hasField($spamField)) {
-            $conditions['Comment.' . $spamField] = array('clean', 'ham');
+
+        $spamField = $this->settings[$this->model->alias()]['spamField'];
+        if ($this->commentsModel->hasField($spamField)) {
+            $conditions['Comments.' . $spamField] = array('clean', 'ham');
         }
-        $model->Behaviors->enable('Containable');
-        $model->Comment->Behaviors->enable('Containable');
         return array('conditions' => $conditions);
+
     }
 }

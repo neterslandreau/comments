@@ -178,7 +178,7 @@ class CommentsComponent extends Component
      * Constructor.
      *
      * @param ComponentRegistry $collection
-     * @param array               $settings
+     * @param array $settings
      * @return CommentsComponent
      */
     public function __construct(ComponentRegistry $collection, $settings = array()) {
@@ -215,7 +215,7 @@ class CommentsComponent extends Component
         $model = TableRegistry::get($controller->modelClass);
         $this->modelName = $controller->modelClass;
         $this->modelAlias = $model->alias();
-        $this->viewVariable = Inflector::variable($this->modelName);
+        $this->viewVariable = strtolower(Inflector::singularize($this->modelName));
         $controller->helpers = array_merge($controller->helpers, [
             'Comments.CommentWidget',
             'Time',
@@ -321,22 +321,15 @@ class CommentsComponent extends Component
      */
     public function callback_view($displayType, $processActions = true) {
         $table = TableRegistry::get($this->modelName);
-        debug($this->assocName);
-//        debug($table->associations()->type('hasOne'));
-//        debug($table->associations()->type('hasMany'));
-        debug(array_merge($table->associations()->type('hasOne'), $table->associations()->type('hasMany')));
-//        debug($table->associations()->type('belongsTo')[0]->name());
         if (!is_object($table) ||
-            (!array_key_exists($this->assocName, array_merge($this->Controller->{$this->modelName}->hasOne, $this->Controller->{$this->modelName}->hasMany)))) {
+            !(array_merge($table->associations()->type('hasOne'), $table->associations()->type('hasMany'))[0]->name() == $this->assocName))
             throw new RuntimeException('CommentsComponent: model ' . $this->modelName . ' or association ' . $this->assocName . ' doesn\'t exist');
+
+        if (empty($this->Controller->viewVars[$this->viewVariable][$table->primarykey()])) {
+            throw new RuntimeException('CommentsComponent: missing view variable ' . $this->viewVariable . ' or value for primary key ' . $table->primaryKey() . ' of model ' . $this->modelName);
         }
 
-        $primaryKey = $this->Controller->{$this->modelName}->primaryKey;
-        if (empty($this->Controller->viewVars[$this->viewVariable][$this->Controller->{$this->modelName}->alias][$primaryKey])) {
-            throw new RuntimeException('CommentsComponent: missing view variable ' . $this->viewVariable . ' or value for primary key ' . $primaryKey . ' of model ' . $this->modelName);
-        }
-
-        $id = $this->Controller->viewVars[$this->viewVariable][$this->Controller->{$this->modelName}->alias][$primaryKey];
+        $id = $table->primaryKey();
         $options = compact('displayType', 'id');
         if ($processActions) {
             $this->_processActions($options);
@@ -383,11 +376,18 @@ class CommentsComponent extends Component
      * @return array
      */
     public function callback_fetchDataFlat($options) {
+        $Comments = TableRegistry::get($this->assocName);
         $paginate = $this->_prepareModel($options);
-
-        $overloadPaginate = !empty($this->Controller->paginate['Comment']) ? $this->Controller->paginate['Comment'] : array();
-        $this->Controller->Paginator->settings['Comment'] = array_merge($paginate, $overloadPaginate);
-        return $this->Controller->Paginator->paginate($this->Controller->{$this->modelName}->Comment);
+debug($paginate);
+        $query = $Comments->find()->where($paginate);
+//var_dump($query);
+//        $overloadPaginate = !empty($this->Controller->paginate($query)) ? $this->Controller->paginate($query) : [];
+//debug($overloadPaginate->toArray());
+//debug($this->Controller->Paginator->settings);
+//        $this->Controller->Paginator->settings['Comments'] = array_merge($paginate, $overloadPaginate);
+//        debug($this->Controller->Paginator->settings['Comments'] = array_merge($paginate, $overloadPaginate));
+//        return $this->Controller->paginate($query->all()->toArray());
+        return $Comments->find()->where($paginate);
     }
 
     /**

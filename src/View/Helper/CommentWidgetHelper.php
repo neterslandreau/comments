@@ -84,9 +84,9 @@ class CommentWidgetHelper extends Helper
      *
      * @param string $file
      * @return void
-     *
+     */
     public function beforeRender($file = null) {
-        parent::beforeRender($file);
+//        parent::beforeRender($file);
         $View = $this->__view();
 
         $this->enabled = !empty($View->viewVars['commentParams']);
@@ -141,8 +141,9 @@ class CommentWidgetHelper extends Helper
         $result = '';
         if ($this->enabled) {
             $View = $this->__view();
-
+//debug($params);
             $params = Hash::merge($View->viewVars['commentParams'], $params);
+//debug($View->viewVars);
             if (isset($params['displayType'])) {
                 $theme = $params['displayType'];
                 if (isset($params['subtheme'])) {
@@ -156,8 +157,8 @@ class CommentWidgetHelper extends Helper
                 $url = array();
             } else {
                 $url = array();
-                if (isset($View->params['userslug'])) {
-                    $url[] = $View->params['userslug'];
+                if (isset($View->request->params['userslug'])) {
+                    $url[] = $View->request->params['userslug'];
                 }
                 if (!empty($View->passedArgs)) {
                     foreach ($View->passedArgs as $key => $value) {
