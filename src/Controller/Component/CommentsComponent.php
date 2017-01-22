@@ -6,24 +6,13 @@ use Cake\Controller\ComponentRegistry;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Cake\Event\Event;
+use Cake\Core\Configure;
 
 /**
  * Comments component
  */
 class CommentsComponent extends Component
 {
-
-    /**
-     * Components
-     *
-     * @var array $components
-     */
-    public $components = array(
-        'Cookie',
-        'Session',
-        'Auth',
-        'Paginator'
-    );
 
     /**
      * Enabled
@@ -38,17 +27,6 @@ class CommentsComponent extends Component
      * @var mixed $controller
      */
     public $Controller = null;
-
-    /**
-     * Name of actions this component should use
-     *
-     * Customizable in beforeFilter()
-     *
-     * @var array $actionNames
-     */
-    public $actionNames = array(
-        'view', 'comments'
-    );
 
     /**
      * Actions used for deleting of some model record, which doesn't use SoftDelete
@@ -111,33 +89,6 @@ class CommentsComponent extends Component
     public $unbindAssoc = false;
 
     /**
-     * Parameters passed to view
-     *
-     * @var array
-     */
-    public $commentParams = array();
-
-    /**
-     * Name of view variable which contains model data for view() action
-     *
-     * Needed just for PK value available in it
-     *
-     * Customizable in beforeFilter(), or default Inflector::variable($this->modelName)
-     *
-     * @var string
-     */
-    public $viewVariable = null;
-
-    /**
-     * Name of view variable for comments data
-     *
-     * Customizable in beforeFilter()
-     *
-     * @var string
-     */
-    public $viewComments = 'commentsData';
-
-    /**
      * Flag to allow anonymous user make comments
      *
      * Customizable in beforeFilter()
@@ -160,18 +111,6 @@ class CommentsComponent extends Component
         'element' => 'default',
         'key' => 'flash',
         'params' => array()
-    );
-
-    /**
-     * Named params used internally by the component
-     *
-     * @var array
-     */
-    protected $_supportNamedParams = array(
-        'comment',
-        'comment_action',
-        'comment_view_type',
-        'quote'
     );
 
     /**
@@ -218,7 +157,6 @@ class CommentsComponent extends Component
         $this->viewVariable = strtolower(Inflector::singularize($this->modelName));
         $controller->helpers = array_merge($controller->helpers, [
             'Comments.CommentWidget',
-            'Time',
             'Comments.Cleaner',
             'Comments.Tree'
         ]);
@@ -236,26 +174,25 @@ class CommentsComponent extends Component
     /**
      * Callback
      *
-     * @return void
+     * @param Event $event
      */
-    public function startup() {
-        $controller = $this->_registry->getController();
-        $this->Controller = $controller;
+    public function startup(Event $event) {
+        $this->Controller = $event->subject();
         if (!$this->active) {
             return;
         }
 
         $this->Auth = $this->Controller->Auth;
         if (!empty($this->Auth) && $this->Auth->user()) {
-            $controller->set('isAuthorized', ($this->Auth->user('id') != ''));
+            $event->subject()->set('isAuthorized', ($this->Auth->user('id') != ''));
         }
 
-        if (in_array($controller->action, $this->deleteActions)) {
-            $controller->{$this->modelName}->{$this->assocName}->softDelete(false);
+        if (in_array($event->subject()->request->action, $this->deleteActions)) {
+            $event->subject()->{$this->modelName}->{$this->assocName}->softDelete(false);
         } elseif ($this->unbindAssoc) {
             foreach (array('hasMany', 'hasOne') as $assocType) {
-                if (array_key_exists($this->assocName, $controller->{$this->modelName}->{$assocType})) {
-                    $controller->{$this->modelName}->unbindModel(array($assocType => array($this->assocName)), false);
+                if (array_key_exists($this->assocName, $event->subject()->{$this->modelName}->{$assocType})) {
+                    $event->subject()->{$this->modelName}->unbindModel(array($assocType => array($this->assocName)), false);
                     break;
                 }
             }
@@ -269,6 +206,8 @@ class CommentsComponent extends Component
      * @return void
      */
     public function beforeRender(Event $event) {
+        debug('component before render');
+        debug($this->Controller->request->action);
         try {
             if ($this->active && in_array($this->Controller->request->action, $this->actionNames)) {
                 $type = $this->_call('initType');
@@ -289,9 +228,9 @@ class CommentsComponent extends Component
      * @return string Type of comment display
      */
     public function callback_initType() {
+        debug('component init type');
         $types = array('flat', 'threaded', 'tree');
         $param = 'Comments.' . $this->modelName;
-
         if (!empty($this->Controller->passedArgs['comment_view_type'])) {
             $type = $this->Controller->passedArgs['comment_view_type'];
             if (in_array($type, $types)) {
@@ -318,7 +257,7 @@ class CommentsComponent extends Component
      * @param bool   $processActions
      * @throws RuntimeException
      * @return void
-     */
+     *
     public function callback_view($displayType, $processActions = true) {
         $table = TableRegistry::get($this->modelName);
         if (!is_object($table) ||
@@ -329,7 +268,7 @@ class CommentsComponent extends Component
             throw new RuntimeException('CommentsComponent: missing view variable ' . $this->viewVariable . ' or value for primary key ' . $table->primaryKey() . ' of model ' . $this->modelName);
         }
 
-        $id = $table->primaryKey();
+        $id = $this->Controller->passedArgs[0];
         $options = compact('displayType', 'id');
         if ($processActions) {
             $this->_processActions($options);
@@ -349,24 +288,34 @@ class CommentsComponent extends Component
      *
      * @param array $options
      * @return array
-     */
+     *
     public function callback_fetchDataTree($options) {
+debug($options);
+        $Comments = TableRegistry::get($this->assocName);
         $settings = $this->_prepareModel($options);
-        $settings += array('order' => array('Comment.lft' => 'asc'));
+        $settings += array('order' => array('Comments.lft' => 'asc'));
+        debug($settings);
+        debug($settings);
         $paginate = $settings;
         $paginate['limit'] = 10;
-
-        $overloadPaginate = !empty($this->Controller->paginate['Comment']) ? $this->Controller->paginate['Comment'] : array();
-        $this->Controller->Paginator->settings['Comment'] = array_merge($paginate, $overloadPaginate);
-        $data = $this->Controller->Paginator->paginate($this->Controller->{$this->modelName}->Comment);
+//debug($paginate);
+//debug($this->Controller->Paginator->getDefaults('Articles', $options));
+//        $overloadPaginate = !empty($this->Controller->paginate['Comments']) ? $this->Controller->paginate['Comments'] : array();
+//        $this->Controller->Paginator->settings['Comments'] = array_merge($paginate, $overloadPaginate);
+        $data = $this->Controller->paginate($Comments, $paginate);
+debug($data);
+//foreach ($data as $datum) {
+//    debug($datum->rght);
+//}
         $parents = array();
-        if (isset($data[0]['Comment'])) {
-            $rec = $data[0]['Comment'];
-            $settings['conditions'][] = array('Comment.lft <' => $rec['lft']);
-            $settings['conditions'][] = array('Comment.rght >' => $rec['rght']);
-            $parents = $this->Controller->{$this->modelName}->Comment->find('all', $settings);
+        if (is_object($data->first())) {
+            $rec = $data->first();
+            $settings['conditions'][] = array('Comments.lft <' => $rec->lft);
+            $settings['conditions'][] = array('Comments.rght >' => $rec->rght);
+debug($settings);
+//            $parents = $this->Controller->{$this->modelName}->Comments->find('all', $settings);
         }
-        return array_merge($parents, $data);
+//        return array_merge($parents, $data);
     }
 
     /**
@@ -374,20 +323,11 @@ class CommentsComponent extends Component
      *
      * @param array $options
      * @return array
-     */
+     *
     public function callback_fetchDataFlat($options) {
         $Comments = TableRegistry::get($this->assocName);
         $paginate = $this->_prepareModel($options);
-debug($paginate);
-        $query = $Comments->find()->where($paginate);
-//var_dump($query);
-//        $overloadPaginate = !empty($this->Controller->paginate($query)) ? $this->Controller->paginate($query) : [];
-//debug($overloadPaginate->toArray());
-//debug($this->Controller->Paginator->settings);
-//        $this->Controller->Paginator->settings['Comments'] = array_merge($paginate, $overloadPaginate);
-//        debug($this->Controller->Paginator->settings['Comments'] = array_merge($paginate, $overloadPaginate));
-//        return $this->Controller->paginate($query->all()->toArray());
-        return $Comments->find()->where($paginate);
+        return $this->Controller->paginate($Comments, $paginate);
     }
 
     /**
@@ -395,26 +335,26 @@ debug($paginate);
      *
      * @param array $options
      * @return array
-     */
+     *
     public function callback_fetchDataThreaded($options) {
-        $Comment =& $this->Controller->{$this->modelName}->Comment;
+        $Comments = TableRegistry::get($this->assocName);
         $settings = $this->_prepareModel($options);
         $settings['fields'] = array(
-            'Comment.author_email', 'Comment.author_name', 'Comment.author_url',
-            'Comment.id', 'Comment.user_id', 'Comment.foreign_key', 'Comment.parent_id', 'Comment.approved',
-            'Comment.title', 'Comment.body', 'Comment.slug', 'Comment.created',
-            $this->Controller->{$this->modelName}->alias . '.' . $this->Controller->{$this->modelName}->primaryKey,
-            $this->userModel . '.' . $Comment->{$this->userModel}->primaryKey,
-            $this->userModel . '.' . $Comment->{$this->userModel}->displayField);
+            'Comments.author_email', 'Comments.author_name', 'Comments.author_url',
+            'Comments.id', 'Comments.user_id', 'Comments.foreign_key', 'Comments.parent_id', 'Comments.approved',
+            'Comments.title', 'Comments.body', 'Comments.slug', 'Comments.created',
+            $this->Controller->{$this->modelName}->alias() . '.' . $this->Controller->{$this->modelName}->primaryKey(),
+            $this->userModel . '.' . $Comments->{$this->userModel}->primaryKey(),
+            $this->userModel . '.' . $Comments->{$this->userModel}->displayField());
 
-        if ($Comment->{$this->userModel}->hasField('slug')) {
+        if ($Comments->{$this->userModel}->hasField('slug')) {
             $settings['fields'][] = $this->userModel . '.slug';
         }
 
         $settings += array('order' => array(
-            'Comment.parent_id' => 'asc',
-            'Comment.created' => 'asc'));
-        return $Comment->find('threaded', $settings);
+            'Comments.parent_id' => 'asc',
+            'Comments.created' => 'asc'));
+        return $Comments->find('threaded', $settings);
     }
 
     /**
@@ -422,7 +362,7 @@ debug($paginate);
      *
      * @param array $options
      * @return array
-     */
+     *
     public function callback_fetchData($options) {
         return $this->callback_fetchDataFlat($options);
     }
@@ -434,6 +374,7 @@ debug($paginate);
      * @return boolean
      */
     protected function _prepareModel($options) {
+        debug('component prepare mode');
         $params = array(
             'isAdmin' => $this->Auth->user('is_admin') == true,
             'userModel' => $this->userModel,
@@ -447,6 +388,7 @@ debug($paginate);
      * @return void
      */
     public function callback_prepareParams() {
+        debug('component prepare params');
         $this->commentParams = array_merge($this->commentParams, array(
             'viewComments' => $this->viewComments,
             'modelName' => $this->modelAlias,
@@ -468,6 +410,10 @@ debug($paginate);
      * @param array   $data
      */
     public function callback_add($modelId, $commentId, $displayType, $data = array()) {
+        debug($modelId);
+        debug($commentId);
+        debug($data);
+        debug($this->Controller->request->data);
         if (!empty($this->Controller->data)) {
             if (!empty($this->Controller->data['Comment']['title'])) {
                 $data['Comment']['title'] = $this->cleanHtml($this->Controller->data['Comment']['title']);
@@ -512,11 +458,11 @@ debug($paginate);
                 }
             }
         } else {
-            if (!empty($this->Controller->passedArgs['quote'])) {
-                if (!empty($this->Controller->passedArgs['comment'])) {
-                    $message = $this->_call('getFormatedComment', array($this->Controller->passedArgs['comment']));
+            if (!empty($_GET['quote'])) {
+                if (!empty(_GET['comment'])) {
+                    $message = $this->_call('getFormatedComment', array($_GET['comment']));
                     if (!empty($message)) {
-                        $this->Controller->request->data['Comment']['body'] = $message;
+                        $$_GET['Comment']['body'] = $message;
                     }
                 }
             }
@@ -530,6 +476,7 @@ debug($paginate);
      * @return string
      */
     public function callback_getFormatedComment($commentId) {
+        debug(('get formatted comment'));
         $comment = $this->Controller->{$this->modelName}->Comment->find('first', array(
             'recursive' => -1,
             'fields' => array('Comment.body', 'Comment.title'),
@@ -551,6 +498,7 @@ debug($paginate);
      * @return void
      */
     public function callback_toggleApprove($modelId, $commentId) {
+        debug('component toggle approve');
         if (!isset($this->Controller->passedArgs['comment_action'])
             || !($this->Controller->passedArgs['comment_action'] == 'toggle_approve' && $this->Controller->Auth->user('is_admin') == true)) {
             throw new BlackHoleException(__d('comments', 'Nonrestricted operation'));
@@ -570,6 +518,7 @@ debug($paginate);
      * @return void
      */
     public function callback_delete($modelId, $commentId) {
+        debug('component delete');
         if ($this->Controller->{$this->modelName}->commentDelete($commentId)) {
             $this->flash(__d('comments', 'The Comment has been deleted.'));
         } else {
@@ -601,7 +550,7 @@ debug($paginate);
      *
      * @param array $urlBase
      * @return void
-     */
+     *
     public function redirect($urlBase = array()) {
         $isAjax = isset($this->Controller->params['isAjax']) ? $this->Controller->params['isAjax'] : false;
 
@@ -623,7 +572,7 @@ debug($paginate);
      * Generate permalink to page
      *
      * @return string URL to the comment
-     */
+     *
     public function permalink() {
         $params = array();
         foreach (array('admin', 'controller', 'action', 'plugin') as $name) {
@@ -674,14 +623,14 @@ debug($paginate);
      */
     protected function _processActions($options) {
         extract($options);
-        if (isset($this->Controller->passedArgs['comment'])) {
+        if (isset($_GET['comment'])) {
             if ($this->allowAnonymousComment || $this->Auth->user()) {
-                if (isset($this->Controller->passedArgs['comment_action'])) {
-                    $commentAction = $this->Controller->passedArgs['comment_action'];
+                if (isset($_GET['comment_action'])) {
+                    $commentAction = $_GET['comment_action'];
                     $isAdmin = (bool)$this->Auth->user('is_admin');
                     if (!$isAdmin) {
                         if (in_array($commentAction, array('delete'))) {
-                            call_user_func(array($this, '_' . Inflector::variable($commentAction)), $id, $this->Controller->passedArgs['comment']);
+                            call_user_func(array($this, '_' . Inflector::variable($commentAction)), $id, $_GET['comment']);
                             return;
                         } else {
                             return $this->Controller->blackHole("CommentsComponent: comment_Action '$commentAction' is for admins only");
@@ -690,10 +639,10 @@ debug($paginate);
                     if (!in_array($commentAction, array('toggle_approve', 'delete'))) {
                         return $this->Controller->blackHole("CommentsComponent: unsupported comment_Action '$commentAction'");
                     }
-                    $this->_call(Inflector::variable($commentAction), array($id, $this->Controller->passedArgs['comment']));
+                    $this->_call(Inflector::variable($commentAction), array($id, $_GET['comment']));
                 } else {
                     Configure::write('Comment.action', 'add');
-                    $parent = empty($this->Controller->passedArgs['comment']) ? null : $this->Controller->passedArgs['comment'];
+                    $parent = empty($_GET['comment']) ? null : $_GET['comment'];
                     $this->_call('add', array($id, $parent, $displayType));
                 }
             } else {

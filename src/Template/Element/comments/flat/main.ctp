@@ -11,14 +11,19 @@
 ?>
 <div class="comments">
 <?php
+debug($allowAddByAuth);
 if ($allowAddByAuth):
 	if ($isAddMode && $allowAddByAuth): ?>
 		<h3><?php echo __d('comments', 'Add New Comment'); ?></h3>
 		<?php
 		echo $this->CommentWidget->element('form', array('comment' => (!empty($comment) ? $comment : 0)));
 	else:
+    //debug($this->request->params);
 		if (empty($this->request->params[$adminRoute]) && $allowAddByAuth):
-			echo $this->CommentWidget->link(__d('comments', 'Add comment'), array_merge($url, array('comment' => 0)));
+			echo $this->CommentWidget->link(__d('comments', 'Add comment'), array_merge(
+                                                                                $url,
+                                                                                ['comment' => 0]
+            ), ['seperator']);
 		endif;
 	endif;
 else: ?>

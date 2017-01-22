@@ -3,7 +3,7 @@
         echo $this->element('Comments.comment', ['item' => $comment, 'class' => 'large-offset-1']);
         echo '<div class="large-offset-1">';
         echo $this->cell('Comments.Comments::addComment', [
-            $foreignKey,
+            $foreign_key,
             $model,
             $this->request->session()->read('Auth.User.id'),
             $comment->id,

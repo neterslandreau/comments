@@ -4,7 +4,7 @@ namespace Comments\View\Cell;
 use Cake\View\Cell;
 
 /**
- * FetchDataThreaded cell
+ * Comments cell
  */
 class CommentsCell extends Cell
 {
@@ -29,11 +29,17 @@ class CommentsCell extends Cell
      */
     public function addComment($foreignKey, $model, $userId, $parentId, $redirectUrl, $child = false)
     {
-        $this->loadModel('Comments');
-        $comment = $this->Comments->newEntity();
         if (!strlen($parentId)) {
             $parentId = null;
         }
+        $this->loadModel('Comments');
+        $topCommentCount = $this->Comments->find()
+            ->where(['foreign_key' => $foreignKey])
+            ->where(['parent_id IS NULL'])
+            ->count();
+
+        $comment = $this->Comments->newEntity();
+        $this->set('topCommentCount', $topCommentCount);
         $this->set('comment', $comment);
         $this->set('foreignKey', $foreignKey);
         $this->set('model', $model);
@@ -60,12 +66,12 @@ class CommentsCell extends Cell
     public function listComments($foreignKey, $model, $userId, $redirectUrl)
     {
         $this->loadModel('Comments');
-        $comments = $this->Comments->find('threaded')->where(['foreignKey' => $foreignKey]);
+        $comments = $this->Comments->find('threaded')->where(['foreign_key' => $foreignKey]);
 
         $this->set('redirectUrl', $redirectUrl);
         $this->set('userId', $userId);
         $this->set('model', $model);
-        $this->set('foreignKey', $foreignKey);
+        $this->set('foreign_key', $foreignKey);
         $this->set('comments', $comments);
     }
 }

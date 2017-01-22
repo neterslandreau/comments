@@ -74,8 +74,8 @@ class CommentsTable extends Table
             ->allowEmpty('id', 'create');
 
         $validator
-            ->uuid('foreignKey')
-            ->requirePresence('foreignKey', 'create')
+            ->uuid('foreign_key')
+            ->requirePresence('foreign_key', 'create')
             ->notEmpty('foreignKey');
 
         $validator

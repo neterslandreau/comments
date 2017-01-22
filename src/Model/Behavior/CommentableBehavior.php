@@ -8,7 +8,7 @@ use Cake\ORM\Behavior;
 use Cake\ORM\Entity;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
-//use Comments\Model\Table\CommentsTable;
+use Comments\Model\Entity\Comment;
 use Cake\ORM\Query;
 use Cake\Utility\Inflector;
 
@@ -37,6 +37,17 @@ class CommentableBehavior extends Behavior
         'userModelClass' => 'Users',
         'userModel' => null,
     );
+
+    /**
+     * @var array
+     */
+    public $definedActions = [
+        'ham',
+        'spam',
+        'commentDelete',
+        'approve',
+        'disapprove',
+    ];
 
     public $model = null;
 
@@ -113,6 +124,39 @@ class CommentableBehavior extends Behavior
     }
 
     /**
+     * @param $action
+     * @param array $items
+     * @return array
+     *
+    public function process($action, array $items)
+    {
+        if (!(in_array($action, $this->definedActions))) {
+            $message = [
+                'type' => 'error',
+                'body' => 'This action is not defined.'
+            ];
+            return $message;
+        }
+        foreach ($items as $item => $act) {
+            debug($action);
+            $act = (bool)($act);
+            if ($act) {
+                if ($action != 'delete') {
+                    $comment = $this->model->get($item);
+                } else {
+
+                }
+            }
+        }
+//        die();
+        $message = [
+            'type' => 'success',
+            'body' => 'this worked'
+        ];
+        return $message;
+    }
+
+    /**
      * Toggle approved field in model record and increment or decrement the associated
      * models comment count appopriately.
      *
@@ -144,13 +188,12 @@ class CommentableBehavior extends Behavior
     /**
      * Delete comment
      *
-     * @param Model $Model
-     * @param string $commentId
-     * @return boolean
-     */
-    public function commentDelete(Model $Model, $commentId = null)
+     * @param null $commentId
+     * @return mixed
+     *
+    public function commentDelete($commentId = null)
     {
-        return $Model->Comment->delete($commentId);
+        return $this->model->delete($commentId);
     }
 
     /**
@@ -161,7 +204,7 @@ class CommentableBehavior extends Behavior
      * @param array $options extra information and comment statistics
      * @throws BlackHoleException
      * @return boolean
-     */
+     *
     public function commentAdd(Model $Model, $commentId = null, $options = array())
     {
         $options = array_merge(array('defaultTitle' => '', 'modelId' => null, 'userId' => null, 'data' => array(), 'permalink' => ''), (array)$options);
@@ -272,7 +315,7 @@ class CommentableBehavior extends Behavior
      *
      * @param array $options
      * @return boolean
-     */
+     *
     public function commentBeforeFind(array $options)
     {
         $options = array_merge(
@@ -330,7 +373,9 @@ class CommentableBehavior extends Behavior
         if ($this->commentsModel->hasField($spamField)) {
             $conditions['Comments.' . $spamField] = array('clean', 'ham');
         }
-        return array('conditions' => $conditions);
+//        debug($conditions);
+        return $conditions;
 
     }
+    /* */
 }

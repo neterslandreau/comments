@@ -1,29 +1,34 @@
+<?= $this->Html->script(['Comments.comments.js'], ['block' => true]) ?>
 <h2><?= __d('comments', 'Comments');?></h2>
 
 
 <ul>
-    <li><?= $this->Html->link(__d('comments', 'Filter spam comments'), array('action' => 'index', 'spam'));?></li>
-    <li><?= $this->Html->link(__d('comments', 'Filter good comments'), array('action' => 'index', 'clean'));?></li>
+    <li>
+        <?= $this->Html->link(__d('comments', 'Filter spam comments'),
+                ['action' => 'index', 'spam']
+        );?>
+    </li>
+    <li>
+        <?= $this->Html->link(__d('comments', 'Filter good comments'),
+            ['action' => 'index', 'clean']
+        );?>
+    </li>
 </ul>
-<?php
-    echo $this->Form->create('Comment',
-    array(
-        'id' => 'CommentForm',
-        'name' => 'CommentForm',
-        'url' => Cake\Utility\Hash::merge(array('action' => 'process'), Cake\Routing\Router::parseNamedParams($this->request))
-    ));?>
-<?= $this->Form->input('Comments.action', array(
+<?= $this->Form->create(null,
+    ['url' => ['action' => 'process']]
+);?>
+<?= $this->Form->input('action', array(
         'type' => 'select',
         'options' => [
-        'ham' => __d('comments', 'Mark as ham'),
-        'spam' => __d('comments', 'Mark as spam'),
-        'delete' => __d('comments', 'Delete'),
-        'approve' => __d('comments', 'Approve'),
-        'disapprove' => __d('comments', 'Dispprove')]
+            'ham' => __d('comments', 'Mark as ham'),
+            'spam' => __d('comments', 'Mark as spam'),
+            'delete' => __d('comments', 'Delete'),
+            'approve' => __d('comments', 'Approve'),
+            'disapprove' => __d('comments', 'Dispprove')
+        ]
     ));
 ?>
-<?= $this->Form->submit('Process', ['name' => 'process']);?>
-<!--  -->
+<?= $this->Form->submit('Process');?>
 <table cellpadding="0" cellspacing="0">
     <tr>
         <th><?= $this->Paginator->sort('name');?></th>
@@ -35,7 +40,7 @@
         <th><?= $this->Paginator->sort('is_spam');?></th>
         <th><?= $this->Paginator->sort('approved');?></th>
         <th><?= __d('comments', 'Select...');?>
-            <input id="mainCheck" style="width: 100%;" type="checkbox" onclick="$('.cbox').each (function (id,f) {$('#'+this.id).attr('checked', !$('#mainCheck').attr('checked'))})"> </th>
+            <input id="mainCheck" style="width: 100%;" type="checkbox"></th>
         <th class="actions"><?= __d('comments', 'Actions');?></th>
     </tr>
     <?php
@@ -73,7 +78,7 @@
         <?= $comment->approved ? __d('comments', 'Yes') : __d('comments', 'No'); ?>
     </td>
     <td class="comment-check">
-        <?= $this->Form->input($comment->id, ['label' => false,'div' => false,'class' => 'cbox','type' => 'checkbox']);?>
+        <?= $this->Form->input($comment->id, ['label' => false, 'div' => false, 'class' => 'cbox', 'type' => 'checkbox']);?>
     </td>
     <td class="actions">
         <?= $this->Html->link(__d('comments', 'Approve'), ['action' => 'approve', $comment->id]); ?>
@@ -87,7 +92,6 @@
     </tr>
     <?php endforeach; ?>
 </table>
-/<!-- -->
 <?= $this->Form->end(); ?>
 
 <?= $this->element('paging'); ?>

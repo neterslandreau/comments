@@ -87,8 +87,9 @@ class CommentWidgetHelper extends Helper
      */
     public function beforeRender($file = null) {
 //        parent::beforeRender($file);
+//        debug('beforeRender');
         $View = $this->__view();
-
+//debug($View->viewVars);
         $this->enabled = !empty($View->viewVars['commentParams']);
         if ($this->enabled) {
             foreach ($this->_passedParams as $param) {
@@ -107,7 +108,10 @@ class CommentWidgetHelper extends Helper
      * @return void
      */
     public function options($data) {
+//        debug($this->options);
+//        debug(array_merge(array_merge($this->globalParams, $this->options), array($data)));
         $this->globalParams = array_merge(array_merge($this->globalParams, $this->options), (array)$data);
+//debug($this->globalParams);
         if (!empty($this->globalParams['target']) && empty($this->globalParams['ajaxOptions'])) {
             $this->globalParams['ajaxOptions'] = array(
                 'rel' => 'nofollow',
@@ -143,7 +147,7 @@ class CommentWidgetHelper extends Helper
             $View = $this->__view();
 //debug($params);
             $params = Hash::merge($View->viewVars['commentParams'], $params);
-//debug($View->viewVars);
+//debug($View->passedArgs);
             if (isset($params['displayType'])) {
                 $theme = $params['displayType'];
                 if (isset($params['subtheme'])) {
@@ -182,7 +186,9 @@ class CommentWidgetHelper extends Helper
             } else {
                 $allowAddByModel = 1;
             }
+//            debug($params['comment']);
             $isAddMode = (isset($params['comment']) && !isset($params['comment_action']));
+            $isAddMode = true;
             $adminRoute = Configure::read('Routing.admin');
 
             $allowAddByAuth = ($this->globalParams['allowAnonymousComment'] || !empty($View->viewVars['isAuthorized']));
@@ -191,6 +197,7 @@ class CommentWidgetHelper extends Helper
             $this->globalParams = Hash::merge($this->globalParams, $params);
             $result = $this->element('main');
         }
+//        debug($result);
         return $result;
     }
 
@@ -202,11 +209,15 @@ class CommentWidgetHelper extends Helper
      * @param array $options
      * @return string, url
      */
-    public function link($title, $url='', $options = array()) {
+    public function link($title, $url = array(), $options = []) {
+//        debug($options);
         if ($this->globalParams['target']) {
             return $this->Js->link($title, $this->prepareUrl($url), array_merge($this->globalParams['ajaxOptions'], $options));
         } else {
-            return $this->Html->link($title, $url, $options);
+//debug($url);
+            $link = $this->Html->link($title, $url, $options);
+//debug($link);
+            return $link;
         }
     }
 
@@ -235,11 +246,19 @@ class CommentWidgetHelper extends Helper
      * @return string, rendered element
      */
     public function element($name, $params = array(), $extra = array()) {
+//        debug($name);
+//        debug($params);
         $View = $this->__view();
         if (strpos($name, '/') === false) {
             $name = 'comments/' . $this->globalParams['theme'] . '/' . $name;
         }
         $params = Hash::merge($this->globalParams, $params);
+//debug($params);
+//if ($name == 'main') {
+//        debug($name);
+//        debug($params);
+//}
+//        debug($name);
         $extra['ignoreMissing'] = true;
         $response = $View->element($name, $params, $extra);
         if (is_null($response) || strpos($response, 'Not Found:') !== false) {

@@ -1,8 +1,13 @@
 <div id="comment-<?= $item->id ?>" class="<?= $class ?>">
-    <div><h3><?= $item->title ?></h3></div>
-    <div><?= $item->body ?></div>
-    <div><?= $item->author_name ?></div>
-    <div><?= $item->author_email ?></div>
-    <div>Created: <?= $item->created ?></div>
-    <div>Modified: <?= $item->modified ?></div>
+    <div class="left">
+        <a><?= $item->author_name ?></a>
+        <!--(<?= $this->Html->link($item->author_name, 'mailto: '.$item->author_email) ?>)-->
+        wrote <?php if($item->title): ?>
+        <i><?= $item->title.': ' ?></i>
+        <?php endif; ?>
+        <?= $item->body ?>
+    </div>
+    <div>
+        &nbsp;<?= $this->Time->timeAgoInWords($item->created) ?>
+    </div>
 </div>
