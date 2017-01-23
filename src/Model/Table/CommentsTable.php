@@ -141,4 +141,15 @@ class CommentsTable extends Table
 
         return $rules;
     }
+
+    /**
+     * Determine if a comment is owned by a user
+     *
+     * @param $commendId
+     * @param $userId
+     */
+    public function isOwnedBy($commentId, $userId)
+    {
+        return $this->exists(['id' => $commentId, 'user_id' => $userId]);
+    }
 }
