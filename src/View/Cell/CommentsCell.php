@@ -85,7 +85,6 @@ class CommentsCell extends Cell
      */
     public function editComment($comment, $userId, $redirectUrl)
     {
-//        debug($comment);
         $this->loadModel('Comments');
         if ($this->Comments->isOwnedBy($comment->id, $userId)) {
             $this->set('comment', $comment);
