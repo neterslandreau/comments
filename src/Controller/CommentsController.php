@@ -122,7 +122,6 @@ class CommentsController extends AppController
             $comment = $this->Comments->patchEntity($comment, $this->request->data);
             if ($this->Comments->save($comment)) {
                 $this->Flash->success(__('The comment has been saved.'));
-
                 return $this->redirect($this->request->data['redirectUrl']);
             } else {
                 $this->Flash->error(__('The comment could not be saved. Please, try again.'));
@@ -144,17 +143,16 @@ class CommentsController extends AppController
             'contain' => []
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
+            debug($this->request->data);
             $comment = $this->Comments->patchEntity($comment, $this->request->data);
             if ($this->Comments->save($comment)) {
                 $this->Flash->success(__('The comment has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect($this->request->data['redirectUrl']);
             } else {
                 $this->Flash->error(__('The comment could not be saved. Please, try again.'));
+                return $this->redirect($this->request->data['redirectUrl']);
             }
         }
-        $this->set(compact('comment'));
-        $this->set('_serialize', ['comment']);
     }
 
     /**
