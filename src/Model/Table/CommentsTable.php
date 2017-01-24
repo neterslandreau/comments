@@ -1,7 +1,6 @@
 <?php
 namespace Comments\Model\Table;
 
-use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -13,7 +12,6 @@ use CakeDC\Users\Model\Table as Users;
  * @property \Cake\ORM\Association\BelongsTo $ParentComment
  * @property \Cake\ORM\Association\BelongsTo $Users
  * @property \Cake\ORM\Association\HasMany $ChildComment
- * @property \Cake\ORM\Association\BelongsToMany $Phinxlog
  *
  * @method \Comments\Model\Entity\Comment get($primaryKey, $options = [])
  * @method \Comments\Model\Entity\Comment newEntity($data = null, array $options = [])
