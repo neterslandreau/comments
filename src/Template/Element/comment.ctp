@@ -1,3 +1,6 @@
+<?php
+    //$parser = new cebe\markdown\Markdown();
+?>
 <div id="comment-<?= $item->id ?>" class="<?= $class ?>">
     <div class="left">
         <a><?= $item->author_name ?></a>
@@ -5,20 +8,22 @@
         wrote <?php if($item->title): ?>
         <i><?= $item->title.': ' ?></i>
         <?php endif; ?>
-        <?= $item->body ?>
+        <span id="body_<?= $item->id ?>"><?= $item->body ?></span>
     </div>
     <div>
         &nbsp;<?= $this->Time->timeAgoInWords($item->created) ?>
     </div>
-    <div class="actions" style="border: solid">
-        <?php if ($commentsTable->isOwnedBy($item->id, $item->user_id)) : ?>
-        <?php
+    <?php
+        if ($commentsModel->isOwnedBy($item->id, $this->request->session()->read('Auth.User.id'))) :
+    ?>
+    <!--<div class="actions" style="border: 1px solid #000;">-->
+        <?php /*
                  echo $this->cell('Comments.Comments::editComment', [
                     $item,
                     $this->request->session()->read('Auth.User.id'),
                     $redirectUrl,
                 ])->render('editComment');
-        ?>
-        <?php endif; ?>
-    </div>
+        */ ?>
+    <!--</div>-->
+    <?php endif; ?>
 </div>

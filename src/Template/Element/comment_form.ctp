@@ -1,15 +1,27 @@
 <div>
     <?php
+        $txt = ($parentId) ? 'Reply' : 'Add Comment';
         $id = ($parentId) ? $parentId : 'top';
-        echo $this->Html->link(
-            'Add comment',
+        $bodyId = ($parentId) ? $parentId : 'top';
+    ?>
+    <?= $this->Html->link(
+            $txt,
             '#',
             [
                 'id' => 'button_'.$id,
                 'onclick' => 'return false'
             ]
-        );
-    ?>
+        ) ?>
+    <?php if ($parentId) : ?>
+        <?= $this->Html->link(
+                'Quote',
+                '#',
+                [
+                    'id' => 'quotebutton_'.$id,
+                    'onclick' => 'return false'
+                ]
+            ) ?>
+    <?php endif; ?>
     <!--<button id="button_<?= ($parentId) ? $parentId : 'top' ?>">Add comment</button>-->
 </div>
 <div class="large-offset-1 comment-form" id="form_<?= ($parentId) ? $parentId : 'top' ?>" style="display:none">
@@ -24,9 +36,9 @@
             echo $this->Form->input('user_id', ['value' => $userId, 'type' => 'hidden']);
             echo $this->Form->input('model', ['value' => $model, 'type' => 'hidden']);
             echo $this->Form->input('title');
-            echo $this->Form->input('body');
+            echo $this->Form->input('body', ['id' => 'formbody_'.$bodyId]);
             echo $this->Form->input('author_name', ['value' => $this->request->session()->read('Auth.User.first_name').' ' .$this->request->session()->read('Auth.User.last_name')]);
-            //           echo $this->Form->input('author_url');
+            //echo $this->Form->input('author_url');
             echo $this->Form->input('author_email', ['value' => $this->request->session()->read('Auth.User.email')]);
             echo $this->Form->input('approved', ['value' => true, 'type' => 'hidden']);
             echo $this->Form->input('is_spam', ['type' => 'hidden', 'value' => 'clean']);
