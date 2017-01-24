@@ -1,6 +1,20 @@
-<div class="large-offset-1 comment-form" id="form_<?= ($parentId) ? $parentId : 'top' ?>">
+<div>
+    <?php
+        $id = ($parentId) ? $parentId : 'top';
+        echo $this->Html->link(
+            'Edit comment',
+            '#',
+            [
+                'id' => 'editbutton_'.$id,
+                'onclick' => 'return false'
+            ]
+        );
+    ?>
+    <!--<button id="button_<?= ($parentId) ? $parentId : 'top' ?>">Add comment</button>-->
+</div>
+<div class="large-offset-1 comment-form" id="editform_<?= ($parentId) ? $parentId : 'top' ?>" style="display:none;">
     <?= $this->Form->create($comment, [
-    'url' => ['controller' => 'Comments', 'action' => 'edit']
+        'url' => ['controller' => 'Comments', 'action' => 'edit']
     ]) ?>
     <fieldset>
         <legend><?= __($legend) ?></legend>
