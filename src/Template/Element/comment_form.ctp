@@ -4,23 +4,27 @@
         $id = ($parentId) ? $parentId : 'top';
         $bodyId = ($parentId) ? $parentId : 'top';
     ?>
-    <?= $this->Html->link(
-            $txt,
-            '#',
-            [
-                'id' => 'button_'.$id,
-                'onclick' => 'return false'
-            ]
-        ) ?>
-    <?php if ($parentId) : ?>
+    <?php if ($this->request->session()->check('Auth.User')) : ?>
         <?= $this->Html->link(
-                'Quote',
+                $txt,
                 '#',
                 [
-                    'id' => 'quotebutton_'.$id,
+                    'id' => 'button_'.$id,
                     'onclick' => 'return false'
                 ]
             ) ?>
+        <?php if ($parentId) : ?>
+            <?= $this->Html->link(
+                    'Quote',
+                    '#',
+                    [
+                        'id' => 'quotebutton_'.$id,
+                        'onclick' => 'return false'
+                    ]
+                ) ?>
+        <?php endif; ?>
+    <?php else : ?>
+    Please log in to comment.
     <?php endif; ?>
     <!--<button id="button_<?= ($parentId) ? $parentId : 'top' ?>">Add comment</button>-->
 </div>
