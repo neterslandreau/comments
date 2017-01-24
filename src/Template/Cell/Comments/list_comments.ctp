@@ -1,6 +1,6 @@
 <?php
     foreach ($comments as $comment) {
-        echo $this->element('Comments.comment', ['commentsTable' => $commentsTable, 'item' => $comment, 'class' => 'large-offset-1']);
+        echo $this->element('Comments.comment', ['commentsModel' => $commentsModel, 'item' => $comment, 'class' => 'large-offset-1']);
         echo '<div class="large-offset-1">';
         echo $this->cell('Comments.Comments::addComment', [
             $foreign_key,
