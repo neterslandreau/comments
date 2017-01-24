@@ -51,8 +51,8 @@ class CommentsCell extends Cell
             $this->set('legend', 'Add Top Level Comment');
             $this->set('label', 'Add Top Level Comment');
         } else {
-            $this->set('legend', 'Add Comment to Comment');
-            $this->set('label', 'Add Comment to Comment');
+            $this->set('legend', 'Reply to Comment');
+            $this->set('label', 'Reply');
         }
     }
 
@@ -74,7 +74,7 @@ class CommentsCell extends Cell
         $this->set('model', $model);
         $this->set('foreign_key', $foreignKey);
         $this->set('comments', $comments);
-        $this->set('commentsTable', $this->Comments);
+        $this->set('commentsModel', $this->Comments);
     }
 
     /**
