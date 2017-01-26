@@ -1,8 +1,8 @@
 <?= $this->Html->script(['Comments.comments.js'], ['block' => true]) ?>
-<h2><?= __d('comments', 'Comments');?></h2>
+<nav class="large-2 medium-3 columns" id="actions-sidebar">
+<ul class="side-nav">
+    <li class="heading">Bulk Actions</li>
 
-
-<ul>
     <li>
         <?= $this->Html->link(__d('comments', 'Filter spam comments'),
                 ['action' => 'index', 'spam']
@@ -14,21 +14,30 @@
         );?>
     </li>
 </ul>
-<?= $this->Form->create(null,
-    ['url' => ['action' => 'process']]
-);?>
-<?= $this->Form->input('action', array(
+    <?php
+        echo $this->Form->create(null,
+            [
+                'id' => 'CommentsForm',
+                'name' => 'CommentsForm',
+                'url' => ['action' => 'process']
+            ]
+        );
+    ?>
+    <?php echo $this->Form->input('action', array(
         'type' => 'select',
         'options' => [
+            'clean' => __d('comments', 'Mark as clean'),
             'ham' => __d('comments', 'Mark as ham'),
             'spam' => __d('comments', 'Mark as spam'),
             'delete' => __d('comments', 'Delete'),
             'approve' => __d('comments', 'Approve'),
             'disapprove' => __d('comments', 'Dispprove')
         ]
-    ));
-?>
-<?= $this->Form->submit('Process');?>
+    ));?>
+    <?= $this->Form->submit('Process');?>
+</nav>
+<div class="comments view large-10 medium-9 columns content">
+    <h3><?= __('Comments') ?></h3>
 <table cellpadding="0" cellspacing="0">
     <tr>
         <th><?= $this->Paginator->sort('name');?></th>
@@ -41,17 +50,10 @@
         <th><?= $this->Paginator->sort('approved');?></th>
         <th><?= __d('comments', 'Select...');?>
             <input id="mainCheck" style="width: 100%;" type="checkbox"></th>
-        <th class="actions"><?= __d('comments', 'Actions');?></th>
+        <th class="actions" colspan="2"><?= __d('comments', 'Actions');?></th>
     </tr>
-    <?php
-	$i = 0;
-	foreach ($comments as $comment) :
-		$class = null;
-		if ($i++ % 2 == 0) {
-			$class = ' class="altrow"';
-		}
-	?>
-    <tr<?= $class;?>>
+    <?php foreach ($comments as $comment) : ?>
+    <tr>
     <td>
         <?= h($comment->title); ?>
     </td>
@@ -80,14 +82,36 @@
     <td class="comment-check">
         <?= $this->Form->input($comment->id, ['label' => false, 'div' => false, 'class' => 'cbox', 'type' => 'checkbox']);?>
     </td>
-    <td class="actions">
-        <?= $this->Html->link(__d('comments', 'Approve'), ['action' => 'approve', $comment->id]); ?>
-        <?= $this->Html->link(__d('comments', 'Mark as spam'), ['action' => 'spam', $comment->id]); ?>
-        <?= $this->Html->link(__d('comments', 'Mark as ham'), ['action' => 'ham', $comment->id]); ?>
-        <?= $this->Html->link(__d('comments', 'Disapprove'), ['action' => 'disapprove', $comment->id]); ?>
-        <?= $this->Html->link(__d('comments', 'View'), ['action' => 'view', $comment->id]); ?>
-        <?= $this->Html->link(__d('comments', 'Edit'), ['action' => 'edit', $comment->id]); ?>
-        <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $comment->id], ['confirm' => __('Are you sure you want to delete # {0}?', $comment->id)]) ?>
+    <td class="actions" colspan="2">
+        <ul class="side-nav">
+            <li>
+                <?= $this->Html->link(__d('comments', 'Approve'), ['action' => 'process', 'approve', $comment->id]); ?>
+            </li>
+            <li>
+                <?= $this->Html->link(__d('comments', 'Mark as clean'), ['action' => 'process', 'clean', $comment->id]); ?>
+            </li>
+            <li>
+                <?= $this->Html->link(__d('comments', 'Mark as spam'), ['action' => 'process', 'spam', $comment->id]); ?>
+            </li>
+            <li>
+                <?= $this->Html->link(__d('comments', 'Mark as ham'), ['action' => 'process', 'ham', $comment->id]); ?>
+            </li>
+            <li>
+                <?= $this->Html->link(__d('comments', 'Disapprove'), ['action' => 'process', 'disapprove', $comment->id]); ?>
+            </li>
+            <li>
+                <?= $this->Html->link(__d('comments', 'View'), ['action' => 'view', $comment->id]); ?>
+            </li>
+            <li>
+                <?= $this->Html->link(__d('comments', 'Edit'), ['action' => 'edit', $comment->id]); ?>
+            </li>
+            <li>
+                <?php /* echo $this->Form->postLink(__d('comments', 'Delete'),
+                    ['action' => 'delete', $comment->id],
+                    ['confirm' => __d('comments', 'Are you sure you want to delete # {0}?', $comment->id)]
+                ); */ ?>
+            </li>
+        </ul>
     </td>
     </tr>
     <?php endforeach; ?>
@@ -95,17 +119,4 @@
 <?= $this->Form->end(); ?>
 
 <?= $this->element('paging'); ?>
-
-<script type="text/javascript">
-    $("td div.hidden").show();
-    $("td a.toggle").click(function(event) {
-        $this = $(this);
-        if ($this[0].innerHTML == 'Show') {
-            $this[0].innerHTML = 'Hide';
-        } else {
-            $this[0].innerHTML = 'Show';
-        }
-        $(this).parent().find("div.hidden").toggle();
-        event.preventDefault();
-    });
-</script>
+</div>
