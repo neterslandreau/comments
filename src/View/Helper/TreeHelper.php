@@ -110,11 +110,13 @@ class TreeHelper extends Helper
             'splitDepth' => false,
             'splitCount' => 3,
         ), (array)$settings);
+//        debug($this->__settings);
         if ($this->__settings['autoPath'] && !isset($this->__settings['autoPath'][2])) {
             $this->__settings['autoPath'][2] = 'active';
         }
         extract($this->__settings);
-        if ($indent === null && Configure::read('debug')) {
+//        if ($indent === null && Configure::read('debug')) {
+        if ($indent === null) {
             $indent = true;
         }
 
@@ -125,6 +127,7 @@ class TreeHelper extends Helper
         if (!$model) {
             $model = '_NULL_';
         }
+//        debug($model);
         $stack = array();
         if ($depth == 0) {
             if ($class) {
@@ -139,6 +142,7 @@ class TreeHelper extends Helper
             $return = "\r\n";
         }
         $__addType = true;
+//        debug($data->find('first'));
         foreach ($data as $i => $result) {
             /* Allow 2d data arrays */
             if ($model == '_NULL_') {

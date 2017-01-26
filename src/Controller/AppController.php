@@ -7,7 +7,7 @@ use Cake\View\CellTrait;
 
 class AppController extends BaseController
 {
-    use CellTrait;
+//    use CellTrait;
     public function initialize()
     {
         parent::initialize();

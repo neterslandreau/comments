@@ -48,14 +48,18 @@ class CommentsController extends AppController
      */
     public $presetVars = array();
 
+    /**
+     * @param Event $event
+     */
     public function beforeFilter(Event $event)
     {
-        $this->Auth->allow();
     }
 
+    /**
+     * @param Event $event
+     */
     public function beforeRender(Event $event)
     {
-//        $this->Html->link('Comments.comments', ['inline' => false]);
     }
     /**
      *
@@ -76,11 +80,10 @@ class CommentsController extends AppController
      */
     public function index()
     {
-//        $comments = $this->paginate($this->Comments);
-        $comments = $this->Comments->find('treeList');
-
-        $this->set(compact('comments'));
-        $this->set('_serialize', ['comments']);
+//        $comments = $this->Comments->find('treeList');
+//
+//        $this->set(compact('comments'));
+//        $this->set('_serialize', ['comments']);
     }
 
     /**
@@ -116,7 +119,6 @@ class CommentsController extends AppController
             $comment = $this->Comments->patchEntity($comment, $this->request->data);
             if ($this->Comments->save($comment)) {
                 $this->Flash->success(__('The comment has been saved.'));
-
                 return $this->redirect($this->request->data['redirectUrl']);
             } else {
                 $this->Flash->error(__('The comment could not be saved. Please, try again.'));
@@ -131,44 +133,23 @@ class CommentsController extends AppController
      * @param string|null $id Comment id.
      * @return \Cake\Network\Response|void Redirects on successful edit, renders view otherwise.
      * @throws \Cake\Network\Exception\NotFoundException When record not found.
-     *
+     */
     public function edit($id = null)
     {
         $comment = $this->Comments->get($id, [
             'contain' => []
         ]);
         if ($this->request->is(['patch', 'post', 'put'])) {
+            debug($this->request->data);
             $comment = $this->Comments->patchEntity($comment, $this->request->data);
             if ($this->Comments->save($comment)) {
                 $this->Flash->success(__('The comment has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
+                return $this->redirect($this->request->data['redirectUrl']);
             } else {
                 $this->Flash->error(__('The comment could not be saved. Please, try again.'));
+                return $this->redirect($this->request->data['redirectUrl']);
             }
         }
-        $this->set(compact('comment'));
-        $this->set('_serialize', ['comment']);
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id Comment id.
-     * @return \Cake\Network\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     *
-    public function delete($id = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $comment = $this->Comments->get($id);
-        if ($this->Comments->delete($comment)) {
-            $this->Flash->success(__('The comment has been deleted.'));
-        } else {
-            $this->Flash->error(__('The comment could not be deleted. Please, try again.'));
-        }
-
-        return $this->redirect(['action' => 'index']);
     }
     /* */
 }

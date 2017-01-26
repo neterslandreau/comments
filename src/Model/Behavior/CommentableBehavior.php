@@ -1,109 +1,203 @@
 <?php
 namespace Comments\Model\Behavior;
 
-use Cake\Datasource\EntityInterface;
-use Cake\Event\Event;
-use Cake\Event\EventManager;
 use Cake\ORM\Behavior;
-use Cake\ORM\Entity;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
-//use Comments\Model\Table\CommentsTable;
-use Cake\ORM\Query;
-use Cake\Utility\Inflector;
-
-class BlackHoleException extends \Exception {}
-class NoActionException extends \Exception {}
+use Comments\Model\Entity\Comment;
 /**
  * CommentableBehavior behavior
  */
 class CommentableBehavior extends Behavior
 {
-
     /**
-     * Config array
+     * Settings array
      *
      * @var array
      */
-    public $config = [];
-
+    public $settings = array();
     /**
-     * @var null
-     *
-    public $table = null;
-
-    /**
-     * Default configuration.
+     * Default settings
      *
      * @var array
      */
-    protected $_defaultConfig = [
-        'commentsTable' => 'Comments.Comments',
+    public $defaults = array(
+        'commentModel' => 'Comments.Comments',
         'spamField' => 'is_spam',
-        'usersTableAlias' => 'UsersTable',
-        'usersTableClass' => 'Users',
-        'usersTable' => null,
+        'userModelAlias' => 'Users',
+        'userModelClass' => 'Users',
+        'userModel' => null,
+    );
+
+    /**
+     * @var array
+     */
+    public $definedActions = [
+        'clean',
+        'ham',
+        'spam',
+        'delete',
+        'approve',
+        'disapprove',
     ];
 
+    public $model = null;
+
+    /**
+     * Initialize behavior
+     *
+     * @param array $config
+     */
     public function initialize(array $config)
     {
         parent::initialize($config);
-//        debug($this);
+        $model = TableRegistry::get($config['modelName']);
+
+        if (!isset($this->settings[$model->alias()])) {
+            $this->settings[$model->alias()] = $this->defaults;
+        }
+        $this->settings[$model->alias()] = array_merge($this->settings[$model->alias()], $config);
+
+        $this->model = $this->bindCommentModels($model);
+    }
+
+    /**
+     * Binds the user model and the current model to the comments model
+     *
+     * @param Table $model
+     * @return Table $model
+     */
+    public function bindCommentModels(Table $model)
+    {
+        $config = $this->settings[$model->alias()];
+        if (!empty($config['commentModel']) && is_array($config['commentModel'])) {
+            $model->hasMany('Comments', $config['commentModel']);
+        } else {
+            $model->hasMany('Comments', [
+                'className' => $config['commentModel'],
+                'foreignKey' => 'foreign_key',
+                'unique' => true,
+                'conditions' => true,
+                'fields' => '',
+                'dependent' => true,
+                'order' => '',
+                'limit' => '',
+                'offset' => '',
+                'exclusive' => '',
+                'finderQuery' => '',
+                'counterQuery' => ''
+
+            ]);
+        }
+        $comments = TableRegistry::get($config['commentModel']);
+        $comments->belongsTo($model->alias(), [
+            'className' => $model->alias(),
+            'foreignKey' => 'foreign_key',
+            'unique' => true,
+            'conditions' => '',
+            'fields' => '',
+            'counterCache' => true,
+            'dependent' => false
+        ]);
+
+        if (!empty($config['userModel']) && is_array($config['userModel'])) {
+            $comments->belongsTo($config['userModelAlias'], $config['userModel']);
+        } else {
+            $comments->belongsTo($config['userModelAlias'], [
+                'className' => $config['userModelClass'],
+                'foreignKey' => 'user_id',
+                'conditions' => '',
+                'fields' => '',
+                'counterCache' => true,
+                'order' => '',
+            ]);
+        }
+        return $model;
+    }
+
+    /**
+     * Provide for bulk or individual comment processing.
+     *
+     * @param $action
+     * @param array $items
+     * @return array
+     */
+    public function process($action, array $items)
+    {
+        $treeBehavior = false;
+        $message = ['type' => 'error', 'body' => '', 'count' => 0];
+        if (!(in_array($action, $this->definedActions))) {
+            $message = [
+                'body' => 'This action is not defined.'
+            ];
+            return $message;
+        }
+        foreach ($items as $item => $act) {
+            $act = (bool)($act);
+            if ($act) {
+                if ($this->model->hasBehavior('Tree')) {
+                    $treeBehavior = true;
+                    $this->model->removeBehavior('Tree');
+                }
+                if ($action != 'delete') {
+                    $comment = $this->model->get($item);
+                    if ($action === 'ham' || $action === 'spam' || $action === 'clean') {
+                        $comment->is_spam = $action;
+                        $r = $this->model->save($comment);
+                        if ($r instanceof Comment) {
+                            $message['count']++;
+                            $message['type'] = 'success';
+                        }
+                    } elseif ($action === 'approve') {
+                        $comment->approved = 1;
+                        $r = $this->model->save($comment);
+                        if ($r instanceof Comment) {
+                            $message['count']++;
+                            $message['type'] = 'success';
+                        }
+                    } elseif ($action === 'disapprove') {
+                        $comment->approved = 0;
+                        $r = $this->model->save($comment);
+                        if ($r instanceof Comment) {
+                            $message['count']++;
+                            $message['type'] = 'success';
+                        }
+                    }
+                } else {
+
+                }
+                if ($treeBehavior) {
+                    $this->model->addBehavior('Tree');
+                }
+            }
+        }
+        return $message;
     }
 
     /**
      * Toggle approved field in model record and increment or decrement the associated
      * models comment count appopriately.
      *
-     * @param Table $Table
+     * @param Model $model
      * @param string $commentId
-     * @param array   $options
+     * @param array $options
      * @return boolean
      */
-    public function commentToggleApprove(Table $Table, $commentId, $options = array())
+    public function commentToggleApprove(Model $model, $commentId, $options = array())
     {
-        $data = $Table->get($commentId);
+        $model->Comment->recursive = -1;
+        $data = $model->Comment->read(null, $commentId);
         if ($data) {
-            if ($data->approved == true) {
-                $data->approved = 0;
-                $direction = 'down';
-            } elseif ($data->approved == false) {
-                $data->approved = 1;
+            if ($data['Comment']['approved'] == 0) {
+                $data['Comment']['approved'] = 1;
                 $direction = 'up';
+            } else {
+                $data['Comment']['approved'] = 0;
+                $direction = 'down';
             }
-
-            if ($Table->save($data)) {
-                $assocTable = TableRegistry::get($data->model);
-                $this->changeCommentCount($assocTable, $data->foreignKey, $direction);
+            if ($model->Comment->save($data, false, array('approved'))) {
+                $this->changeCommentCount($model, $data['Comment']['foreign_key'], $direction);
                 return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Increment or decrement the comment count cache on the associated model
-     *
-     * @param Table $table Associated table to change count of
-     * @param mixed  $id The id to change count of
-     * @param string $direction 'up' or 'down'
-     * @return null
-     */
-    public function changeCommentCount(Table $Table, $id = null, $direction = 'up') {
-        $data = $Table->get($id);
-        $cnt = $data->comments;
-        if ($Table->hasField('comments')) {
-            if ($direction == 'up') {
-                $cnt++;
-            } elseif ($direction == 'down') {
-                $cnt--;
-            }
-            $Table->id = $id;
-            if (!is_null($direction) && $Table->exists([true])) {
-                return $Table->updateAll(
-                    [$Table->alias() . '.comments' => $cnt],
-                    [$Table->alias() . '.id' => $id]
-                );
             }
         }
         return false;
@@ -112,51 +206,38 @@ class CommentableBehavior extends Behavior
     /**
      * Delete comment
      *
-     * @param Table $table
-     * @param string $commentId
-     * @return boolean
-     */
-    public function commentDelete(Table $table, $commentId = null)
+     * @param null $commentId
+     * @return mixed
+     *
+    public function commentDelete($commentId = null)
     {
-        $entity = $table->get($commentId);
-        return $table->delete($entity);
+        return $this->model->delete($commentId);
     }
 
     /**
      * Handle adding comments
      *
-     * @param Table $Table Object of the related model class
+     * @param Model $Model Object of the related model class
      * @param mixed $commentId parent comment id, 0 for none
      * @param array $options extra information and comment statistics
      * @throws BlackHoleException
      * @return boolean
      */
-    public function commentAdd(Table $Table, $commentId = null, $options = array())
+    public function commentAdd(Model $Model, $commentId = null, $options = array())
     {
-        $options = array_merge(
-            [
-                'defaultTitle' => '',
-                'modelId' => null,
-                'userId' => null,
-                'data' => array(),
-                'permalink' => ''
-            ],
-            (array)$options
-        );
-
+        $options = array_merge(array('defaultTitle' => '', 'modelId' => null, 'userId' => null, 'data' => array(), 'permalink' => ''), (array)$options);
         extract($options);
         if (isset($options['permalink'])) {
-            $Table->permalink = $options['permalink'];
+            $Model->Comment->permalink = $options['permalink'];
         }
+        $Model->Comment->recursive = -1;
         if (!empty($commentId)) {
-            $Table->id = $commentId;
-            if (!$Table->get('count', [
-                'conditions' => [
-                    'Comments.id' => $commentId,
-                    'Comments.approved' => true,
-                    'Comments.foreign_key' => $modelId
-                ]
-            ])) {
+            $Model->Comment->id = $commentId;
+            if (!$Model->Comment->find('count', array('conditions' => array(
+                'Comment.id' => $commentId,
+                'Comment.approved' => true,
+                'Comment.foreign_key' => $modelId)))
+            ) {
                 throw new BlackHoleException(__d('comments', 'Unallowed comment id', true));
             }
         }
@@ -179,14 +260,14 @@ class CommentableBehavior extends Behavior
                     }
                 }
             }
-            $event = new Event('Behavior.Commentable.beforeCreateComment', $entity, $data);
-            EventManager::instance()->dispatch($event);
+            $event = new CakeEvent('Behavior.Commentable.beforeCreateComment', $Model, $data);
+            CakeEventManager::instance()->dispatch($event);
             if ($event->isStopped() && !$event->result) {
                 return false;
             } elseif ($event->result) {
                 $data = $event->result;
             }
-            $entity->create($data);
+            $Model->Comment->create($data);
             if ($Model->Comment->Behaviors->enabled('Tree')) {
                 if (isset($data['Comment']['foreign_key'])) {
                     $fk = $data['Comment']['foreign_key'];
@@ -199,15 +280,15 @@ class CommentableBehavior extends Behavior
                         'scope' => array('Comment.foreign_key' => $fk))
                 );
             }
-            if ($entity->save()) {
-                $id = $entity->id;
+            if ($Model->Comment->save()) {
+                $id = $Model->Comment->id;
                 $data['Comment']['id'] = $id;
-                $entity->data[$entity->alias]['id'] = $id;
+                $Model->Comment->data[$Model->Comment->alias]['id'] = $id;
                 if (!isset($data['Comment']['approved']) || $data['Comment']['approved'] == true) {
-                    $this->changeCommentCount($entity, $modelId);
+                    $this->changeCommentCount($Model, $modelId);
                 }
-                $event = new Event('Behavior.Commentable.afterCreateComment', $entity, $entity->data);
-                EventManager::instance()->dispatch($event);
+                $event = new CakeEvent('Behavior.Commentable.afterCreateComment', $Model, $Model->Comment->data);
+                CakeEventManager::instance()->dispatch($event);
                 if ($event->isStopped() && !$event->result) {
                     return false;
                 }
@@ -220,14 +301,99 @@ class CommentableBehavior extends Behavior
     }
 
     /**
+     * Increment or decrement the comment count cache on the associated model
+     *
+     * @param Model $Model Model to change count of
+     * @param mixed $id The id to change count of
+     * @param string $direction 'up' or 'down'
+     * @return null
+     */
+    public function changeCommentCount(Model $Model, $id = null, $direction = 'up')
+    {
+        if ($Model->hasField('comments')) {
+            if ($direction == 'up') {
+                $direction = '+ 1';
+            } elseif ($direction == 'down') {
+                $direction = '- 1';
+            } else {
+                $direction = null;
+            }
+            $Model->id = $id;
+            if (!is_null($direction) && $Model->exists(true)) {
+                return $Model->updateAll(
+                    array($Model->alias . '.comments' => $Model->alias . '.comments ' . $direction),
+                    array($Model->alias . '.id' => $id));
+            }
+        }
+        return false;
+    }
+
+    /**
      * Prepare models association to before fetch data
      *
-     * @param Event $event
-     * @param EntityInterface $entity
+     * @param array $options
      * @return boolean
      */
-    public function commentBeforeFind(Event $event, EntityInterface $entity)
+    public function commentBeforeFind(array $options)
     {
-        return [];
+        $options = array_merge(
+            [
+                'userModel' => $this->settings[$this->model->alias()]['userModelAlias'],
+                'userData' => null,
+                'isAdmin' => false
+            ],
+            (array)$options
+        );
+        extract($options);
+
+        $unbind = array();
+        foreach (array('belongsTo', 'hasOne', 'hasMany', 'hasAndBelongsToMany') as $assocType) {
+            if ($this->commentsModel->association($assocType)) {
+                $unbind[$assocType] = array();
+                foreach ($this->commentsModel->association($assocType) as $key => $assocConfig) {
+                    $keep = false;
+                    if (!empty($options['keep']) && in_array($key, $options['keep'])) {
+                        $keep = true;
+                    }
+                    if (!in_array($key, array($userModel, $this->model->alias())) && !$keep) {
+                        $unbind[$assocType][] = $key;
+                    }
+                }
+            }
+        }
+
+        if (!empty($unbind)) {
+            // @todo check this in unit test. this is wrong!
+            $this->commentsModel->associations->remove($unbind);
+        }
+
+        $this->commentsModel->addAssociations([
+            'belongsTo' => [
+                $this->model->alias() => [
+                    'fields' => [$this->model->primaryKey()]
+                ],
+                $userModel => [
+                    'fields' => ['id', '$this->commentsModel->{$userModel}->displayField()', 'slug']
+                ]
+            ]
+        ]);
+
+        $conditions = ['Comments.approved' => 1];
+        if (isset($id)) {
+            $conditions[$this->model->alias() . '.' . $this->model->primaryKey()] = $id;
+            $conditions[$this->commentsModel->alias() . '.model'] = $this->commentsModel->alias();
+        }
+        if ($isAdmin) {
+            unset($conditions['Comments.approved']);
+        }
+
+        $spamField = $this->settings[$this->model->alias()]['spamField'];
+        if ($this->commentsModel->hasField($spamField)) {
+            $conditions['Comments.' . $spamField] = array('clean', 'ham');
+        }
+//        debug($conditions);
+        return $conditions;
+
     }
+    /* */
 }

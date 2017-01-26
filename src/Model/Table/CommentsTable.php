@@ -1,7 +1,6 @@
 <?php
 namespace Comments\Model\Table;
 
-use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -13,7 +12,6 @@ use CakeDC\Users\Model\Table as Users;
  * @property \Cake\ORM\Association\BelongsTo $ParentComment
  * @property \Cake\ORM\Association\BelongsTo $Users
  * @property \Cake\ORM\Association\HasMany $ChildComment
- * @property \Cake\ORM\Association\BelongsToMany $Phinxlog
  *
  * @method \Comments\Model\Entity\Comment get($primaryKey, $options = [])
  * @method \Comments\Model\Entity\Comment newEntity($data = null, array $options = [])
@@ -41,12 +39,10 @@ class CommentsTable extends Table
         $this->table('comments');
         $this->displayField('title');
         $this->primaryKey('id');
-//        $this->alias('comments');
 
         $this->addBehavior('Timestamp');
         $this->addBehavior('Tree');
         $this->addBehavior('Sluggable');
-        $this->addBehavior('Comments.Commentable', []);
 
         $this->belongsTo('ParentComments', [
             'className' => 'Comments.Comments',
@@ -55,7 +51,7 @@ class CommentsTable extends Table
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
-            'className' => 'Users'
+            'className' => 'Users.Users'
         ]);
         $this->hasMany('ChildComment', [
             'className' => 'Comments.Comments',
@@ -76,8 +72,8 @@ class CommentsTable extends Table
             ->allowEmpty('id', 'create');
 
         $validator
-            ->uuid('foreignKey')
-            ->requirePresence('foreignKey', 'create')
+            ->uuid('foreign_key')
+            ->requirePresence('foreign_key', 'create')
             ->notEmpty('foreignKey');
 
         $validator
@@ -142,5 +138,16 @@ class CommentsTable extends Table
         $rules->add($rules->existsIn(['user_id'], 'Users'));
 
         return $rules;
+    }
+
+    /**
+     * Determine if a comment is owned by a user
+     *
+     * @param $commendId
+     * @param $userId
+     */
+    public function isOwnedBy($commentId, $userId)
+    {
+        return $this->exists(['id' => $commentId, 'user_id' => $userId]);
     }
 }

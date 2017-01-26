@@ -1,8 +1,27 @@
+<?php
+    //$parser = new cebe\markdown\Markdown();
+?>
 <div id="comment-<?= $item->id ?>" class="<?= $class ?>">
-    <div><h3><?= $item->title ?></h3></div>
-    <div><?= $item->body ?></div>
-    <div><?= $item->author_name ?></div>
-    <div><?= $item->author_email ?></div>
-    <div>Created: <?= $item->created ?></div>
-    <div>Modified: <?= $item->modified ?></div>
+    <div class="left">
+        <a title="<?= $item->author_name ?>"><?= $item->author_name ?></a>
+        <!--(<?= $this->Html->link($item->author_name, 'mailto: '.$item->author_email) ?>)-->
+        wrote <?php if($item->title): ?>
+        <i><?= $item->title.': ' ?></i>
+        <?php endif; ?>
+        <span id="body_<?= $item->id ?>"><?= $item->body ?></span>
+    </div>
+    <div>
+        &nbsp;<?= $this->Time->timeAgoInWords($item->created) ?>
+    </div>
+    <?php if ($commentsModel->isOwnedBy($item->id, $this->request->session()->read('Auth.User.id'))) : ?>
+    <!--<div class="actions" style="border: 1px solid #000;">-->
+        <?php /*
+                 echo $this->cell('Comments.Comments::editComment', [
+                    $item,
+                    $this->request->session()->read('Auth.User.id'),
+                    $redirectUrl,
+                ])->render('editComment');
+        */ ?>
+    <!--</div>-->
+    <?php endif; ?>
 </div>

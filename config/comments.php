@@ -1,11 +1,8 @@
 <?php
 
-use Cake\Core\Configure;
-
-$config = [
+return [
     'Comments' => [
         'table' => 'Comments.Comments',
+        'displayType' => 'threaded', // threaded or all
     ],
 ];
-
-return $config;

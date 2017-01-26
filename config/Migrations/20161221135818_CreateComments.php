@@ -20,7 +20,7 @@ class CreateComments extends AbstractMigration
             'null' => true,
             'default' => null
         ]);
-        $table->addColumn('foreignKey', 'uuid', [
+        $table->addColumn('foreign_key', 'uuid', [
             'null' => false,
             'default' => null
         ]);
