@@ -3,7 +3,6 @@ namespace Comments\Controller\Admin;
 
 use Comments\Controller\AppController;
 use Cake\ORM\TableRegistry;
-use Cake\Utility\Hash;
 
 class CommentsController extends AppController
 {
@@ -25,30 +24,11 @@ class CommentsController extends AppController
     );
 
     /**
-     * Uses
-     *
-     * @var array
-     *
-    public $uses = array(
-        'Comments.Comments'
-    );
-
-    /**
      * Preset for search views
      *
      * @var array
      */
     public $presetVars = array();
-
-    /**
-     * @var array
-     *
-    public $components = [
-        'RequestHandler',
-        'Paginator',
-        'Search.Prg',
-        'Comments.Comments', ['active' => false],
-    ];
 
     /**
      *
@@ -58,7 +38,7 @@ class CommentsController extends AppController
         parent::initialize();
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Paginator');
-        $this->loadComponent('Comments.Comments', ['active' => false]);
+        $this->loadComponent('Comments.Comments', ['active' => true]);
         $this->Comments = TableRegistry::get($this->modelClass);
     }
 
@@ -69,11 +49,6 @@ class CommentsController extends AppController
      * @return void
      */
     public function index($type = '') {
-//        $conditions = $this->_adminIndexSearch();
-//        debug($conditions);
-//        $comments = $this->Comments->find()
-//            ->where($conditions);
-
         if ($type == 'spam') {
             $comments = $this->Comments->find()
                 ->contain(['Users'])
@@ -89,7 +64,6 @@ class CommentsController extends AppController
                 ->contain(['Users']);
         }
         $comments = $this->paginate($comments);
-//debug($comments);
         $this->set(compact('comments'));
         $this->set('_serialize', ['comments']);
     }
@@ -103,11 +77,9 @@ class CommentsController extends AppController
      */
     public function view($id = null)
     {
-//        debug($this->Comments->associations());
         $comment = $this->Comments->get($id, [
             'contain' => ['ParentComments', 'ChildComment', 'Users']
         ]);
-//debug($comment->Users);
         $this->set('comment', $comment);
         $this->set('_serialize', ['comment']);
     }
@@ -166,15 +138,17 @@ class CommentsController extends AppController
      * @param string $folder Name of the folder to process
      * @return void
      */
-    public function process($type = null) {
+    public function process($action = null, $id = null) {
         $this->autoRender = false;
-        if (!empty($this->request->data)) {
+        if (empty($this->request->data)) {
+            $message = $this->Comments->process($action, [$id => 1]);
+        } else {
             $action = array_shift($this->request->data);
             $message = $this->Comments->process($action, $this->request->data);
-            $this->Flash->{$message['type']}($message['body']);
         }
-//        $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index');
-//        $this->redirect($url);
+        $this->Flash->{$message['type']}($message['body']);
+        $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index');
+        $this->redirect($url);
     }
 
     /**

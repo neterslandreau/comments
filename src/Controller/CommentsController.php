@@ -50,10 +50,9 @@ class CommentsController extends AppController
 
     /**
      * @param Event $event
-     *
+     */
     public function beforeFilter(Event $event)
     {
-        $this->Auth->allow();
     }
 
     /**
@@ -61,7 +60,6 @@ class CommentsController extends AppController
      */
     public function beforeRender(Event $event)
     {
-//        $this->Html->link('Comments.comments', ['inline' => false]);
     }
     /**
      *
@@ -82,11 +80,10 @@ class CommentsController extends AppController
      */
     public function index()
     {
-//        $comments = $this->paginate($this->Comments);
-        $comments = $this->Comments->find('treeList');
-
-        $this->set(compact('comments'));
-        $this->set('_serialize', ['comments']);
+//        $comments = $this->Comments->find('treeList');
+//
+//        $this->set(compact('comments'));
+//        $this->set('_serialize', ['comments']);
     }
 
     /**
@@ -153,26 +150,6 @@ class CommentsController extends AppController
                 return $this->redirect($this->request->data['redirectUrl']);
             }
         }
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id Comment id.
-     * @return \Cake\Network\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function delete($id = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $comment = $this->Comments->get($id);
-        if ($this->Comments->delete($comment)) {
-            $this->Flash->success(__('The comment has been deleted.'));
-        } else {
-            $this->Flash->error(__('The comment could not be deleted. Please, try again.'));
-        }
-
-        return $this->redirect(['action' => 'index']);
     }
     /* */
 }
