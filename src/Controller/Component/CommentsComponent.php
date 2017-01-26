@@ -6,7 +6,7 @@ use Cake\Controller\ComponentRegistry;
 use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Cake\Event\Event;
-use Cake\Core\Configure;
+use Cake\Controller\Exception\MissingActionException;
 
 /**
  * Comments component
@@ -29,6 +29,17 @@ class CommentsComponent extends Component
     public $Controller = null;
 
     /**
+     * Name of actions this component should use
+     *
+     * Customizable in beforeFilter()
+     *
+     * @var array $actionNames
+     */
+    public $actionNames = array(
+        'view', 'comments'
+    );
+
+    /**
      * Actions used for deleting of some model record, which doesn't use SoftDelete
      * (so we want comments delete directly)
      *
@@ -39,7 +50,7 @@ class CommentsComponent extends Component
      *
      * @var array $deleteActions
      */
-    public $deleteActions = array();
+    public $deleteActions = [];
 
     /**
      * Name of 'commentable' model
@@ -86,7 +97,7 @@ class CommentsComponent extends Component
      *
      * @var boolean
      */
-    public $unbindAssoc = false;
+    public $unbindAssoc = true;
 
     /**
      * Flag to allow anonymous user make comments
@@ -177,6 +188,8 @@ class CommentsComponent extends Component
      * @param Event $event
      */
     public function startup(Event $event) {
+//        debug('component startup');
+        $model = TableRegistry::get($event->subject()->modelClass);
         $this->Controller = $event->subject();
         if (!$this->active) {
             return;
@@ -188,15 +201,22 @@ class CommentsComponent extends Component
         }
 
         if (in_array($event->subject()->request->action, $this->deleteActions)) {
-            $event->subject()->{$this->modelName}->{$this->assocName}->softDelete(false);
+            // add your softdelete behavior stuff here
         } elseif ($this->unbindAssoc) {
-            foreach (array('hasMany', 'hasOne') as $assocType) {
-                if (array_key_exists($this->assocName, $event->subject()->{$this->modelName}->{$assocType})) {
-                    $event->subject()->{$this->modelName}->unbindModel(array($assocType => array($this->assocName)), false);
-                    break;
-                }
+            $matches = $model->associations()->type('HasMany', 'HasOne');
+            foreach ($matches as $match) {
+                $model->associations()->remove($match->name());
             }
         }
+    }
+
+    /**
+     * Callback
+     *
+     * @param $event
+     */
+    public function beforeFilter($event)
+    {
     }
 
     /**
@@ -206,8 +226,7 @@ class CommentsComponent extends Component
      * @return void
      */
     public function beforeRender(Event $event) {
-        debug('component before render');
-        debug($this->Controller->request->action);
+//        debug('component before render');
         try {
             if ($this->active && in_array($this->Controller->request->action, $this->actionNames)) {
                 $type = $this->_call('initType');
@@ -218,15 +237,34 @@ class CommentsComponent extends Component
             }
         } catch (BlackHoleException $exception) {
             return $this->Controller->blackHole($exception->getMessage());
-        } catch (NoActionException $exception) {
+        } catch (MissingActionException $exception) {
         }
+    }
+
+    /**
+     * Process comments
+     *
+     * @param null $action
+     * @param null $id
+     * @return mixed
+     */
+    public function commentProcess($action = null, $id = null) {
+        $this->autoRender = false;
+        if (!empty($this->request->data)) {
+            $action = array_shift($this->request->data);
+            $message = $this->Comments->process($action, $this->request->data);
+            $this->Flash->{$message['type']}($message['body']);
+        } else {
+            $message = $this->Comments->process($action, [$id => 1]);
+        }
+        return $message;
     }
 
     /**
      * Determine used type of display (flat/threaded/tree)
      *
      * @return string Type of comment display
-     */
+     *
     public function callback_initType() {
         debug('component init type');
         $types = array('flat', 'threaded', 'tree');
@@ -372,7 +410,7 @@ debug($settings);
      *
      * @param array $options
      * @return boolean
-     */
+     *
     protected function _prepareModel($options) {
         debug('component prepare mode');
         $params = array(
@@ -386,9 +424,9 @@ debug($settings);
      * Prepare passed parameters.
      *
      * @return void
-     */
+     *
     public function callback_prepareParams() {
-        debug('component prepare params');
+//        debug('component prepare params');
         $this->commentParams = array_merge($this->commentParams, array(
             'viewComments' => $this->viewComments,
             'modelName' => $this->modelAlias,
@@ -408,7 +446,7 @@ debug($settings);
      * @param integer $commentId Parent comment id
      * @param string  $displayType
      * @param array   $data
-     */
+     *
     public function callback_add($modelId, $commentId, $displayType, $data = array()) {
         debug($modelId);
         debug($commentId);
@@ -474,7 +512,7 @@ debug($settings);
      *
      * @param string $commentId
      * @return string
-     */
+     *
     public function callback_getFormatedComment($commentId) {
         debug(('get formatted comment'));
         $comment = $this->Controller->{$this->modelName}->Comment->find('first', array(
@@ -496,9 +534,9 @@ debug($settings);
      * @param string $commentId
      * @throws BlackHoleException
      * @return void
-     */
+     *
     public function callback_toggleApprove($modelId, $commentId) {
-        debug('component toggle approve');
+//        debug('component toggle approve');
         if (!isset($this->Controller->passedArgs['comment_action'])
             || !($this->Controller->passedArgs['comment_action'] == 'toggle_approve' && $this->Controller->Auth->user('is_admin') == true)) {
             throw new BlackHoleException(__d('comments', 'Nonrestricted operation'));
@@ -516,9 +554,9 @@ debug($settings);
      * @param string $modelId
      * @param string $commentId
      * @return void
-     */
+     *
     public function callback_delete($modelId, $commentId) {
-        debug('component delete');
+//        debug('component delete');
         if ($this->Controller->{$this->modelName}->commentDelete($commentId)) {
             $this->flash(__d('comments', 'The Comment has been deleted.'));
         } else {
@@ -533,7 +571,7 @@ debug($settings);
      *
      * @param string $message The message to set.
      * @return void
-     */
+     *
     public function flash($message) {
         $isAjax = isset($this->Controller->params['isAjax']) ? $this->Controller->params['isAjax'] : false;
         if ($isAjax) {
@@ -600,10 +638,11 @@ debug($settings);
      *
      * @param string $method
      * @param array  $args
-     * @throws BadMethodCallException
+     * @throws MissingActionException
      * @return mixed
      */
     protected function _call($method, $args = array()) {
+//        debug($method);
         $methodName = 'callback_comments' . Inflector::camelize(Inflector::underscore($method));
         $localMethodName = 'callback_' . $method;
         if (method_exists($this->Controller, $methodName)) {
@@ -611,7 +650,7 @@ debug($settings);
         } elseif (method_exists($this, $localMethodName)) {
             return call_user_func_array(array($this, $localMethodName), $args);
         } else {
-            throw new BadMethodCallException();
+            throw new MissingActionException($method);
         }
     }
 
@@ -620,7 +659,7 @@ debug($settings);
      *
      * @param array
      * @return boolean
-     */
+     *
     protected function _processActions($options) {
         extract($options);
         if (isset($_GET['comment'])) {
@@ -651,4 +690,5 @@ debug($settings);
             }
         }
     }
+    /* */
 }
