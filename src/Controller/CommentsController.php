@@ -80,10 +80,10 @@ class CommentsController extends AppController
      */
     public function index()
     {
-//        $comments = $this->Comments->find('treeList');
-//
-//        $this->set(compact('comments'));
-//        $this->set('_serialize', ['comments']);
+        $comments = $this->Comments->find('treeList');
+
+        $this->set(compact('comments'));
+        $this->set('_serialize', ['comments']);
     }
 
     /**
