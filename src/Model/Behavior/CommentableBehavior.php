@@ -1,19 +1,10 @@
 <?php
 namespace Comments\Model\Behavior;
 
-use Cake\Datasource\EntityInterface;
-use Cake\Event\Event;
-use Cake\Event\EventManager;
 use Cake\ORM\Behavior;
-use Cake\ORM\Entity;
 use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
 use Comments\Model\Entity\Comment;
-use Cake\ORM\Query;
-use Cake\Utility\Inflector;
-
-class BlackHoleException extends \Exception {}
-class NoActionException extends \Exception {}
 /**
  * CommentableBehavior behavior
  */
@@ -42,9 +33,10 @@ class CommentableBehavior extends Behavior
      * @var array
      */
     public $definedActions = [
+        'clean',
         'ham',
         'spam',
-        'commentDelete',
+        'delete',
         'approve',
         'disapprove',
     ];
@@ -66,7 +58,7 @@ class CommentableBehavior extends Behavior
         }
         $this->settings[$model->alias()] = array_merge($this->settings[$model->alias()], $config);
 
-        list($this->model, $this->commentsModel) = $this->bindCommentModels($model);
+        $this->model = $this->bindCommentModels($model);
     }
 
     /**
@@ -120,39 +112,65 @@ class CommentableBehavior extends Behavior
                 'order' => '',
             ]);
         }
-        return [$model, $comments];
+        return $model;
     }
 
     /**
+     * Provide for bulk or individual comment processing.
+     *
      * @param $action
      * @param array $items
      * @return array
-     *
+     */
     public function process($action, array $items)
     {
+        $treeBehavior = false;
+        $message = ['type' => 'error', 'body' => '', 'count' => 0];
         if (!(in_array($action, $this->definedActions))) {
             $message = [
-                'type' => 'error',
                 'body' => 'This action is not defined.'
             ];
             return $message;
         }
         foreach ($items as $item => $act) {
-            debug($action);
             $act = (bool)($act);
             if ($act) {
+                if ($this->model->hasBehavior('Tree')) {
+                    $treeBehavior = true;
+                    $this->model->removeBehavior('Tree');
+                }
                 if ($action != 'delete') {
                     $comment = $this->model->get($item);
+                    if ($action === 'ham' || $action === 'spam' || $action === 'clean') {
+                        $comment->is_spam = $action;
+                        $r = $this->model->save($comment);
+                        if ($r instanceof Comment) {
+                            $message['count']++;
+                            $message['type'] = 'success';
+                        }
+                    } elseif ($action === 'approve') {
+                        $comment->approved = 1;
+                        $r = $this->model->save($comment);
+                        if ($r instanceof Comment) {
+                            $message['count']++;
+                            $message['type'] = 'success';
+                        }
+                    } elseif ($action === 'disapprove') {
+                        $comment->approved = 0;
+                        $r = $this->model->save($comment);
+                        if ($r instanceof Comment) {
+                            $message['count']++;
+                            $message['type'] = 'success';
+                        }
+                    }
                 } else {
 
                 }
+                if ($treeBehavior) {
+                    $this->model->addBehavior('Tree');
+                }
             }
         }
-//        die();
-        $message = [
-            'type' => 'success',
-            'body' => 'this worked'
-        ];
         return $message;
     }
 
@@ -204,7 +222,7 @@ class CommentableBehavior extends Behavior
      * @param array $options extra information and comment statistics
      * @throws BlackHoleException
      * @return boolean
-     *
+     */
     public function commentAdd(Model $Model, $commentId = null, $options = array())
     {
         $options = array_merge(array('defaultTitle' => '', 'modelId' => null, 'userId' => null, 'data' => array(), 'permalink' => ''), (array)$options);
@@ -315,7 +333,7 @@ class CommentableBehavior extends Behavior
      *
      * @param array $options
      * @return boolean
-     *
+     */
     public function commentBeforeFind(array $options)
     {
         $options = array_merge(
