@@ -1,6 +1,7 @@
 <?php
 namespace Comments\View\Cell;
 
+use Cake\Core\Configure;
 use Cake\View\Cell;
 
 /**
@@ -67,7 +68,8 @@ class CommentsCell extends Cell
     public function listComments($foreignKey, $model, $userId, $redirectUrl)
     {
         $this->loadModel('Comments');
-        $comments = $this->Comments->find('threaded')->where(['foreign_key' => $foreignKey]);
+        $comments = $this->Comments->find(Configure::read('Comments.displayType'))
+            ->where(['foreign_key' => $foreignKey, 'approved' => true, 'is_spam' => 'clean']);
 
         $this->set('redirectUrl', $redirectUrl);
         $this->set('userId', $userId);
