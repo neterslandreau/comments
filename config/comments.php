@@ -3,6 +3,6 @@
 return [
     'Comments' => [
         'table' => 'Comments.Comments',
-        'displayType' => 'threaded', // threaded or all
+        'displayType' => 'all', // finder for retrieiving comments (threaded or all)
     ],
 ];

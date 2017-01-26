@@ -2,7 +2,7 @@
     $displayType = Cake\Core\Configure::read('Comments.displayType');
     foreach ($comments as $comment) :
 ?>
-        <?= $this->element('Comments.comment', ['commentsModel' => $commentsModel, 'item' => $comment, 'class' => 'large-offset-1']); ?>
+        <?= $this->element('Comments.comments/comment', ['commentsModel' => $commentsModel, 'item' => $comment, 'class' => 'large-offset-1']); ?>
         <?= $this->cell('Comments.Comments::addComment', [
             $foreign_key,
             $model,

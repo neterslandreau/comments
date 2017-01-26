@@ -1,1 +1,1 @@
-<?php echo $this->element('comment_form'); ?>
+<?php echo $this->element('comments/comment_form'); ?>

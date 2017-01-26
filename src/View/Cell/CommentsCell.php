@@ -69,7 +69,11 @@ class CommentsCell extends Cell
     {
         $this->loadModel('Comments');
         $comments = $this->Comments->find(Configure::read('Comments.displayType'))
-            ->where(['foreign_key' => $foreignKey, 'approved' => true, 'is_spam' => 'clean']);
+            ->where([
+                'foreign_key' => $foreignKey,
+                'approved' => true,
+                'OR' => [['is_spam' => 'clean'], ['is_spam' => 'ham']]
+            ]);
 
         $this->set('redirectUrl', $redirectUrl);
         $this->set('userId', $userId);
