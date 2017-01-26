@@ -1,17 +1,19 @@
 <?php
-    foreach ($comments as $comment) {
-        echo $this->element('Comments.comment', ['commentsModel' => $commentsModel, 'item' => $comment, 'class' => 'large-offset-1']);
-        echo '<div class="large-offset-1">';
-        echo $this->cell('Comments.Comments::addComment', [
+    $displayType = Cake\Core\Configure::read('Comments.displayType');
+    foreach ($comments as $comment) :
+?>
+        <?= $this->element('Comments.comment', ['commentsModel' => $commentsModel, 'item' => $comment, 'class' => 'large-offset-1']); ?>
+        <?= $this->cell('Comments.Comments::addComment', [
             $foreign_key,
             $model,
             $this->request->session()->read('Auth.User.id'),
             $comment->id,
             $redirectUrl,
             true
-        ])->render('addComment');
-        echo '</div>';
-        foreach ($comment->children as $c => $child) {
-            echo $this->element('Comments.comment', ['item' => $child, 'class' => 'large-offset-2']);
-        }
-    }
+        ])->render('addComment'); ?>
+    <?php if ($displayType === 'threaded') : ?>
+        <?php foreach ($comment->children as $c => $child) : ?>
+            <?= $this->element('Comments.comment', ['item' => $child, 'class' => 'large-offset-2']); ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+<?php endforeach; ?>

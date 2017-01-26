@@ -3,25 +3,33 @@
         $txt = ($parentId) ? 'Reply' : 'Add Comment';
         $id = ($parentId) ? $parentId : 'top';
         $bodyId = ($parentId) ? $parentId : 'top';
+        $displayType = Cake\Core\Configure::read('Comments.displayType');
     ?>
     <?php if ($this->request->session()->check('Auth.User')) : ?>
-        <?= $this->Html->link(
-                $txt,
-                '#',
-                [
-                    'id' => 'button_'.$id,
-                    'onclick' => 'return false'
-                ]
-            ) ?>
-        <?php if ($parentId) : ?>
+    <?php if ($legend == 'Add Top Level Comment' || ($displayType === 'threaded')) : ?>
             <?= $this->Html->link(
-                    'Quote',
+                    $txt,
                     '#',
                     [
-                        'id' => 'quotebutton_'.$id,
-                        'onclick' => 'return false'
+                        'id' => 'button_'.$id,
+                        'onclick' => 'return false',
+                        'title' => 'Click to add comment.',
                     ]
                 ) ?>
+    <?php endif; ?>
+        <?php if ($displayType == 'threaded') : ?>
+            <?php if ($parentId) : ?>
+                <?= $this->Html->link(
+                        'Quote',
+                        '#',
+                        [
+                            'id' => 'quotebutton_'.$id,
+                            'onclick' => 'return false',
+                            'title' => 'Click to add comment with markup-ready quoted parent.',
+                        ]
+                    ) ?>
+            <?php endif; ?>
+        <?php else : ?>
         <?php endif; ?>
     <?php else : ?>
     Please log in to comment.
