@@ -36,7 +36,8 @@ class CommentableBehavior extends Behavior
         'clean',
         'ham',
         'spam',
-        'delete',
+        'deleteWithChildren',
+        'deleteCommentOnly',
         'approve',
         'disapprove',
     ];
@@ -59,6 +60,7 @@ class CommentableBehavior extends Behavior
         $this->settings[$model->alias()] = array_merge($this->settings[$model->alias()], $config);
 
         $this->model = $this->bindCommentModels($model);
+//        $this->model = $model;
     }
 
     /**
@@ -125,7 +127,7 @@ class CommentableBehavior extends Behavior
     public function process($action, array $items)
     {
         $treeBehavior = false;
-        $message = ['type' => 'error', 'body' => '', 'count' => 0];
+        $message = ['type' => 'error', 'body' => 'No comments were processed', 'count' => 0];
         if (!(in_array($action, $this->definedActions))) {
             $message = [
                 'body' => 'This action is not defined.'
@@ -135,11 +137,12 @@ class CommentableBehavior extends Behavior
         foreach ($items as $item => $act) {
             $act = (bool)($act);
             if ($act) {
-                if ($this->model->hasBehavior('Tree')) {
-                    $treeBehavior = true;
-                    $this->model->removeBehavior('Tree');
-                }
-                if ($action != 'delete') {
+                $message['body'] = '';
+                if ($action != 'deleteWithChildren' || $action !== 'deleteCommentOnly') {
+                    if ($this->model->hasBehavior('Tree')) {
+                        $treeBehavior = true;
+                        $this->model->removeBehavior('Tree');
+                    }
                     $comment = $this->model->get($item);
                     if ($action === 'ham' || $action === 'spam' || $action === 'clean') {
                         $comment->is_spam = $action;
@@ -147,6 +150,7 @@ class CommentableBehavior extends Behavior
                         if ($r instanceof Comment) {
                             $message['count']++;
                             $message['type'] = 'success';
+//                            $message['body'] .= '<li>'.'</li>';
                         }
                     } elseif ($action === 'approve') {
                         $comment->approved = 1;
@@ -154,6 +158,7 @@ class CommentableBehavior extends Behavior
                         if ($r instanceof Comment) {
                             $message['count']++;
                             $message['type'] = 'success';
+//                            $message['body'] .= '<li>'.'</li>';
                         }
                     } elseif ($action === 'disapprove') {
                         $comment->approved = 0;
@@ -161,13 +166,14 @@ class CommentableBehavior extends Behavior
                         if ($r instanceof Comment) {
                             $message['count']++;
                             $message['type'] = 'success';
+//                            $message['body'] .= $comment->id.'has been marked not approved.';
                         }
+                    }
+                    if ($treeBehavior) {
+                        $this->model->addBehavior('Tree');
                     }
                 } else {
 
-                }
-                if ($treeBehavior) {
-                    $this->model->addBehavior('Tree');
                 }
             }
         }

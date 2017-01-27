@@ -49,6 +49,7 @@ class CommentsController extends AppController
      * @return void
      */
     public function index($type = '') {
+        $this->request->session()->write('Comments.filterFlag', $type);
         if ($type == 'spam') {
             $comments = $this->Comments->find()
                 ->contain(['Users'])
@@ -64,6 +65,7 @@ class CommentsController extends AppController
                 ->contain(['Users']);
         }
         $comments = $this->paginate($comments);
+        $this->set('filter', $type);
         $this->set(compact('comments'));
         $this->set('_serialize', ['comments']);
     }
@@ -147,7 +149,8 @@ class CommentsController extends AppController
             $message = $this->Comments->process($action, $this->request->data);
         }
         $this->Flash->{$message['type']}($message['body']);
-        $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index');
+        $filterFlag = $this->request->session()->read('Comments.filterFlag');
+        $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index', $filterFlag);
         $this->redirect($url);
     }
 

@@ -38,7 +38,6 @@ class CommentableBehaviorTest extends TestCase
             'userModelClass' => 'Users.Users',
             'modelName' => 'Comments.Comments'
         ]);
-//        debug($this->Comments->find()->all());
 
     }
 
@@ -125,6 +124,9 @@ class CommentableBehaviorTest extends TestCase
         $this->assertEquals($results['count'], $count);
     }
 
+    /**
+     *
+     */
     public function testProcessDisapprove()
     {
         $action = 'disapprove';

@@ -166,11 +166,6 @@ class CommentsComponent extends Component
         $this->modelName = $controller->modelClass;
         $this->modelAlias = $model->alias();
         $this->viewVariable = strtolower(Inflector::singularize($this->modelName));
-        $controller->helpers = array_merge($controller->helpers, [
-            'Comments.CommentWidget',
-            'Comments.Cleaner',
-            'Comments.Tree'
-        ]);
         $loadedBehaviors = $model->behaviors()->loaded();
 
         if (!in_array('Commentable', $loadedBehaviors)) {

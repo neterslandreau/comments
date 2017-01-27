@@ -2,10 +2,14 @@
 <nav class="large-2 medium-3 columns" id="actions-sidebar">
 <ul class="side-nav">
     <li class="heading">Bulk Actions</li>
-
+    <li>
+        <?= $this->Html->link(__d('comments', 'No filter'),
+            ['action' => 'index']
+        );?>
+    </li>
     <li>
         <?= $this->Html->link(__d('comments', 'Filter spam comments'),
-                ['action' => 'index', 'spam']
+            ['action' => 'index', 'spam']
         );?>
     </li>
     <li>
@@ -29,7 +33,8 @@
             'clean' => __d('comments', 'Mark as clean'),
             'ham' => __d('comments', 'Mark as ham'),
             'spam' => __d('comments', 'Mark as spam'),
-            'delete' => __d('comments', 'Delete'),
+            'deleteWithChildren' => __d('comments', 'Delete with Children'),
+            'deleteCommentOnly' => __d('comments', 'Delete Comment Only'),
             'approve' => __d('comments', 'Approve'),
             'disapprove' => __d('comments', 'Dispprove')
         ]
