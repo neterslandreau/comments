@@ -208,7 +208,7 @@ class CommentsComponent extends Component
      * Generate permalink to page
      *
      * @return string URL to the comment
-     *
+     */
     public function permalink() {
         $params = array();
         foreach (array('admin', 'controller', 'action', 'plugin') as $name) {
