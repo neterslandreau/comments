@@ -38,7 +38,7 @@ class CommentsController extends AppController
         parent::initialize();
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Paginator');
-        $this->loadComponent('Comments.Comments', ['active' => true]);
+        $this->loadComponent('Comments.Comments', ['active' => false]);
         $this->Comments = TableRegistry::get($this->modelClass);
     }
 
