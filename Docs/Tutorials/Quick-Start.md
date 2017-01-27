@@ -1,7 +1,7 @@
 Quick Start
 ===========
 
-We have a Post model and want to have comments on the /posts/view page. So we need to choose how we want to display the comments - flat or threaded.  In our example we will use the flat type comments. Inside the Comments plugin edit the config/comments.php and indicate the display type.
+We have a Post model and want to have comments on the /posts/view page.
 
 Inside the view (in this case it will be View/Posts/view.ctp) 
 we will add the next line at the end of the view file.
@@ -11,3 +11,5 @@ we will add the next line at the end of the view file.
 ```
 
 You should now be able to comment on that page.
+
+You can change the type of display for your comments in the config/comments.php.
