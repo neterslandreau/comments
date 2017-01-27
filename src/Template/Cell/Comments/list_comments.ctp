@@ -13,7 +13,7 @@
         ])->render('addComment'); ?>
     <?php if ($displayType === 'threaded') : ?>
         <?php foreach ($comment->children as $c => $child) : ?>
-            <?= $this->element('Comments.comment', ['item' => $child, 'class' => 'large-offset-2']); ?>
+            <?= $this->element('Comments.comments/comment', ['item' => $child, 'class' => 'large-offset-2']); ?>
         <?php endforeach; ?>
     <?php endif; ?>
 <?php endforeach; ?>
