@@ -3,7 +3,7 @@ Quick Start
 
 We have a Post model and want to have comments on the /posts/view page.
 
-Inside the view (in this case it will be View/Posts/view.ctp) 
+Inside the view (in this case it will be Template/Posts/view.ctp) 
 we will add the next line at the end of the view file.
 
 ```php
