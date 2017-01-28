@@ -36,7 +36,6 @@ class CommentableBehavior extends Behavior
         'clean',
         'ham',
         'spam',
-        'deleteWithChildren',
         'deleteCommentOnly',
         'approve',
         'disapprove',
@@ -59,8 +58,8 @@ class CommentableBehavior extends Behavior
         }
         $this->settings[$model->alias()] = array_merge($this->settings[$model->alias()], $config);
 
-        $this->model = $this->bindCommentModels($model);
-//        $this->model = $model;
+//        $this->model = $this->bindCommentModels($model);
+        $this->model = $model;
     }
 
     /**
@@ -134,11 +133,11 @@ class CommentableBehavior extends Behavior
             ];
             return $message;
         }
+        $message['body'] = '';
         foreach ($items as $item => $act) {
             $act = (bool)($act);
             if ($act) {
-                $message['body'] = '';
-                if ($action != 'deleteWithChildren' || $action !== 'deleteCommentOnly') {
+                if ($action !== 'deleteCommentOnly') {
                     if ($this->model->hasBehavior('Tree')) {
                         $treeBehavior = true;
                         $this->model->removeBehavior('Tree');
@@ -166,14 +165,22 @@ class CommentableBehavior extends Behavior
                         if ($r instanceof Comment) {
                             $message['count']++;
                             $message['type'] = 'success';
-//                            $message['body'] .= $comment->id.'has been marked not approved.';
+//                            $message['body'] .= $comment->id.' has been marked not approved.<br />';
                         }
                     }
                     if ($treeBehavior) {
                         $this->model->addBehavior('Tree');
                     }
-                } else {
+                }
 
+                if ($action == 'deleteCommentOnly') {
+                    $comment = $this->model->get($item);
+                    $this->model->removeFromTree($comment);
+                    if ($this->model->delete($comment)) {
+                        $message['count']++;
+                        $message['type'] = 'success';
+//                        $message['body'] = '';
+                    }
                 }
             }
         }
