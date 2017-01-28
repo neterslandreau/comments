@@ -29,17 +29,6 @@ class CommentsComponent extends Component
     public $Controller = null;
 
     /**
-     * Name of actions this component should use
-     *
-     * Customizable in beforeFilter()
-     *
-     * @var array $actionNames
-     */
-    public $actionNames = array(
-        'view', 'comments'
-    );
-
-    /**
      * Actions used for deleting of some model record, which doesn't use SoftDelete
      * (so we want comments delete directly)
      *
@@ -60,15 +49,6 @@ class CommentsComponent extends Component
      * @var string Model name
      */
     public $modelName = null;
-
-    /**
-     * Name of association for comments
-     *
-     * Customizable in beforeFilter()
-     *
-     * @var string Association name
-     */
-    public $assocName = 'Comments';
 
     /**
      * Name of user model associated to comment
@@ -109,22 +89,6 @@ class CommentsComponent extends Component
     public $allowAnonymousComment = false;
 
     /**
-     * Settings to use when CommentsComponent needs to do a flash message with SessionComponent::setFlash().
-     * Available keys are:
-     *
-     * - `element` - The element to use, defaults to 'default'.
-     * - `key` - The key to use, defaults to 'flash'
-     * - `params` - The array of additional params to use, defaults to array()
-     *
-     * @var array
-     */
-    public $flash = array(
-        'element' => 'default',
-        'key' => 'flash',
-        'params' => array()
-    );
-
-    /**
      * Constructor.
      *
      * @param ComponentRegistry $collection
@@ -157,9 +121,6 @@ class CommentsComponent extends Component
         }
         if (empty($this->Auth) && !empty($this->Controller->Auth)) {
             $this->Auth = $this->Controller->Auth;
-        }
-        if (!$this->active) {
-            return;
         }
 
         $model = TableRegistry::get($controller->modelClass);
