@@ -148,6 +148,7 @@ class CommentsController extends AppController
             $action = array_shift($this->request->data);
             $message = $this->Comments->process($action, $this->request->data);
         }
+        debug($message);
         $this->Flash->{$message['type']}($message['body']);
         $filterFlag = $this->request->session()->read('Comments.filterFlag');
         $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index', $filterFlag);
