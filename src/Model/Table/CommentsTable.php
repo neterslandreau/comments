@@ -4,7 +4,7 @@ namespace Comments\Model\Table;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
-use CakeDC\Users\Model\Table as Users;
+use Cake\Core\Configure;
 
 /**
  * Comment Model
@@ -36,25 +36,16 @@ class CommentsTable extends Table
     {
         parent::initialize($config);
 
-        $this->table('comments');
-        $this->displayField('title');
-        $this->primaryKey('id');
-
-        $this->addBehavior('Timestamp');
-        $this->addBehavior('Tree');
-        $this->addBehavior('Sluggable');
-//        $this->addBehavior('Comments.Commentable', [
-//            'userModelAlias' => 'Users',
-//            'userModelClass' => 'Users.Users',
-//            'modelName' => 'Comments.Comments'
-//        ]);
+        $this->table(Configure::read('Comments.table'));
+        $this->displayField(Configure::read('Comments.displayField'));
+        $this->primaryKey(Configure::read('Comments.primaryKey'));
 
         $this->belongsTo('ParentComments', [
-            'className' => 'Comments.Comments',
+            'className' => Configure::read('Comments.class'),
             'foreignKey' => 'parent_id',
         ]);
         $this->belongsTo('Comments', [
-            'className' => 'Comments.Comments',
+            'className' => Configure::read('Comments.class'),
             'foreignKey' => 'foreign_key',
             'unique' => true,
             'conditions' => '',
@@ -66,7 +57,7 @@ class CommentsTable extends Table
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
-            'className' => 'Users.Users',
+            'className' => Configure::read('Comments.usersClass'),
             'conditions' => '',
             'fields' => '',
             'counterCache' => true,
@@ -74,11 +65,11 @@ class CommentsTable extends Table
 
         ]);
         $this->hasMany('ChildComment', [
-            'className' => 'Comments.Comments',
+            'className' => Configure::read('Comments.class'),
             'foreignKey' => 'parent_id'
         ]);
         $this->hasMany('Comments', [
-            'className' => 'Comments.Comments',
+            'className' => Configure::read('Comments.class'),
             'foreignKey' => 'foreign_key',
             'unique' => true,
             'conditions' => true,
@@ -92,6 +83,11 @@ class CommentsTable extends Table
             'counterQuery' => ''
 
         ]);
+
+        $this->addBehavior('Timestamp');
+        $this->addBehavior('Tree');
+        $this->addBehavior('Sluggable');
+
     }
 
     /**

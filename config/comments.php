@@ -2,7 +2,11 @@
 
 return [
     'Comments' => [
-        'table' => 'Comments.Comments',
-        'displayType' => 'all', // finder for retrieiving comments (threaded or all)
+        'table' => 'comments',
+        'class' => 'Comments.Comments',
+        'displayField' => 'title',
+        'primaryKey' => 'id',
+        'usersClass' => 'Users.Users',
+        'displayType' => 'threaded', // finder for retrieiving comments (threaded or all)
     ],
 ];
