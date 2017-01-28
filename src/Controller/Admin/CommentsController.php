@@ -38,7 +38,7 @@ class CommentsController extends AppController
         parent::initialize();
         $this->loadComponent('RequestHandler');
         $this->loadComponent('Paginator');
-        $this->loadComponent('Comments.Comments', ['active' => false]);
+        $this->loadComponent('Comments.Comments');
         $this->Comments = TableRegistry::get($this->modelClass);
     }
 
@@ -153,25 +153,5 @@ class CommentsController extends AppController
         $filterFlag = $this->request->session()->read('Comments.filterFlag');
         $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index', $filterFlag);
         $this->redirect($url);
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id Comment id.
-     * @return \Cake\Network\Response|null Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function delete($id = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $comment = $this->Comments->get($id);
-        if ($this->Comments->delete($comment)) {
-            $this->Flash->success(__('The comment has been deleted.'));
-        } else {
-            $this->Flash->error(__('The comment could not be deleted. Please, try again.'));
-        }
-
-        return $this->redirect(['action' => 'index']);
     }
 }
