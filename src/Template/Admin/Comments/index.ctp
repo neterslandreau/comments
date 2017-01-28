@@ -33,8 +33,7 @@
             'clean' => __d('comments', 'Mark as clean'),
             'ham' => __d('comments', 'Mark as ham'),
             'spam' => __d('comments', 'Mark as spam'),
-            'deleteWithChildren' => __d('comments', 'Delete with Children'),
-            'deleteCommentOnly' => __d('comments', 'Delete Comment Only'),
+            'deleteCommentOnly' => __d('comments', 'Delete'),
             'approve' => __d('comments', 'Approve'),
             'disapprove' => __d('comments', 'Dispprove')
         ]
@@ -111,10 +110,10 @@
                 <?= $this->Html->link(__d('comments', 'Edit'), ['action' => 'edit', $comment->id]); ?>
             </li>
             <li>
-                <?php /* echo $this->Form->postLink(__d('comments', 'Delete'),
-                    ['action' => 'delete', $comment->id],
+                <?php echo $this->Form->postLink(__d('comments', 'Delete'),
+                    ['action' => 'process', 'deleteCommentOnly', $comment->id],
                     ['confirm' => __d('comments', 'Are you sure you want to delete # {0}?', $comment->id)]
-                ); */ ?>
+                ); ?>
             </li>
         </ul>
     </td>
