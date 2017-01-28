@@ -43,19 +43,54 @@ class CommentsTable extends Table
         $this->addBehavior('Timestamp');
         $this->addBehavior('Tree');
         $this->addBehavior('Sluggable');
+//        $this->addBehavior('Comments.Commentable', [
+//            'userModelAlias' => 'Users',
+//            'userModelClass' => 'Users.Users',
+//            'modelName' => 'Comments.Comments'
+//        ]);
 
         $this->belongsTo('ParentComments', [
             'className' => 'Comments.Comments',
-            'foreignKey' => 'parent_id'
+            'foreignKey' => 'parent_id',
         ]);
+        $this->belongsTo('Comments', [
+            'className' => 'Comments.Comments',
+            'foreignKey' => 'foreign_key',
+            'unique' => true,
+            'conditions' => '',
+            'fields' => '',
+            'counterCache' => true,
+            'dependent' => false
+        ]);
+
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'joinType' => 'INNER',
-            'className' => 'Users.Users'
+            'className' => 'Users.Users',
+            'conditions' => '',
+            'fields' => '',
+            'counterCache' => true,
+            'order' => '',
+
         ]);
         $this->hasMany('ChildComment', [
             'className' => 'Comments.Comments',
             'foreignKey' => 'parent_id'
+        ]);
+        $this->hasMany('Comments', [
+            'className' => 'Comments.Comments',
+            'foreignKey' => 'foreign_key',
+            'unique' => true,
+            'conditions' => true,
+            'fields' => '',
+            'dependent' => true,
+            'order' => '',
+            'limit' => '',
+            'offset' => '',
+            'exclusive' => '',
+            'finderQuery' => '',
+            'counterQuery' => ''
+
         ]);
     }
 

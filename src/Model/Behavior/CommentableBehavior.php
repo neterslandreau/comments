@@ -58,62 +58,7 @@ class CommentableBehavior extends Behavior
         }
         $this->settings[$model->alias()] = array_merge($this->settings[$model->alias()], $config);
 
-//        $this->model = $this->bindCommentModels($model);
         $this->model = $model;
-    }
-
-    /**
-     * Binds the user model and the current model to the comments model
-     *
-     * @param Table $model
-     * @return Table $model
-     */
-    public function bindCommentModels(Table $model)
-    {
-        $config = $this->settings[$model->alias()];
-        if (!empty($config['commentModel']) && is_array($config['commentModel'])) {
-            $model->hasMany('Comments', $config['commentModel']);
-        } else {
-            $model->hasMany('Comments', [
-                'className' => $config['commentModel'],
-                'foreignKey' => 'foreign_key',
-                'unique' => true,
-                'conditions' => true,
-                'fields' => '',
-                'dependent' => true,
-                'order' => '',
-                'limit' => '',
-                'offset' => '',
-                'exclusive' => '',
-                'finderQuery' => '',
-                'counterQuery' => ''
-
-            ]);
-        }
-        $comments = TableRegistry::get($config['commentModel']);
-        $comments->belongsTo($model->alias(), [
-            'className' => $model->alias(),
-            'foreignKey' => 'foreign_key',
-            'unique' => true,
-            'conditions' => '',
-            'fields' => '',
-            'counterCache' => true,
-            'dependent' => false
-        ]);
-
-        if (!empty($config['userModel']) && is_array($config['userModel'])) {
-            $comments->belongsTo($config['userModelAlias'], $config['userModel']);
-        } else {
-            $comments->belongsTo($config['userModelAlias'], [
-                'className' => $config['userModelClass'],
-                'foreignKey' => 'user_id',
-                'conditions' => '',
-                'fields' => '',
-                'counterCache' => true,
-                'order' => '',
-            ]);
-        }
-        return $model;
     }
 
     /**
