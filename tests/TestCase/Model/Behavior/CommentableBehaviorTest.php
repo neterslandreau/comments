@@ -3,6 +3,7 @@ namespace Comments\Test\TestCase\Model\Behavior;
 
 use Cake\TestSuite\TestCase;
 use Cake\ORM\TableRegistry;
+use Comments\Model\Entity\Comment;
 
 
 /**
@@ -148,82 +149,35 @@ class CommentableBehaviorTest extends TestCase
         }
         $this->assertEquals($results['count'], $count);
     }
-    /**
-     * Test commentToggleApprove method
-     *
-     * @return void
-     *
-    public function testCommentToggleApprove()
-    {
-//        debug($this->CommentableBehavior->config());
-//        $commentId = '00000000-0000-0000-0000-000000000001';
-//        $foreignKey = $this->Comments->get($commentId)->foreignKey;
-//        $assocTable = TableRegistry::get($this->Comments->get($commentId)->model);
-//        $assocData = $assocTable->get($foreignKey);
-//        $origCnt = $assocData->comments;
-//        $rtn = $this->Comments->commentToggleApprove($this->Comments, $commentId);
-//        $this->assertTrue($rtn);
-//
-//        $assocTable = TableRegistry::get($this->Comments->get($commentId)->model);
-//        $assocData = $assocTable->get($foreignKey);
-//        $newCnt = $assocData->comments;
-//        $this->assertEquals($newCnt, $origCnt + 1);
-//
-//        $rtn = $this->Comments->commentToggleApprove($this->Comments, $commentId);
-//        $assocTable = TableRegistry::get($this->Comments->get($commentId)->model);
-//        $assocData = $assocTable->get($foreignKey);
-//        $thrdCnt = $assocData->comments;
-//        $this->assertTrue($rtn);
-//        $this->assertEquals($thrdCnt, $newCnt - 1);
-
-    }
 
     /**
-     * Test commentDelete method
      *
-     * @return void
-     *
-    public function testCommentDelete()
+     */
+    public function testProcessDeleteCommentOnly()
     {
-        $commentId = '00000000-0000-0000-0000-000000000001';
-
-        $cnt = count($this->Comments->find()->toArray());
-        $rtn = $this->Comments->commentDelete($this->Comments, $commentId);
-        $this->assertTrue($rtn);
-        $ncnt = count($this->Comments->find()->toArray());
-        $this->assertEquals($ncnt, $cnt - 1);
-
-    }
-
-    /**
-     * Test commentAdd method
-     *
-     * @return void
-     *
-    public function testCommentAdd()
-    {
-        $id = '00000000-0000-0000-0000-000000000001';
-        $comment = $this->Comments->get($id, ['contain' => ['Users']]);
-        debug($comment->foreignKey);
-        $options = [
-            'permalink' => $comment->permalink,
-            'modelId' => $comment->foreignKey
-
+        $action = 'deleteCommentOnly';
+        $items = [
+            '00000000-0000-0000-0000-000000000016' => '1',
+            '00000000-0000-0000-0000-000000000018' => '0',
+            '00000000-0000-0000-0000-000000000019' => '1',
         ];
+        $commentsStart = $this->Comments->find()->count();
+        $results = $this->Comments->process($action, $items);
+        $commentsEnd = $this->Comments->find()->count();
 
-//        $rtn = $this->Comments->commentAdd($comment, $comment->id, $options);
+        $this->assertEquals('success', $results['type']);
+        $count = 0;
+        foreach ($items as $item => $act) {
+            if (!$act) {
+                $comment = $this->Comments->get($item);
+                $this->assertInstanceOf('Comments\Model\Entity\Comment', $comment);
+            } else {
+                $count++;
+            }
+        }
+        $this->assertEquals($commentsStart - $commentsEnd, $count);
 
-        $this->markTestIncomplete('Not implemented yet.');
     }
 
-    /**
-     * Test commentBeforeFind method
-     *
-     * @return void
-     *
-    public function testCommentBeforeFind()
-    {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
     /* */
 }
