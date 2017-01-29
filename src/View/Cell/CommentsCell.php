@@ -34,13 +34,8 @@ class CommentsCell extends Cell
             $parentId = null;
         }
         $this->loadModel('Comments');
-        $topCommentCount = $this->Comments->find()
-            ->where(['foreign_key' => $foreignKey])
-            ->where(['parent_id IS NULL'])
-            ->count();
 
         $comment = $this->Comments->newEntity();
-        $this->set('topCommentCount', $topCommentCount);
         $this->set('comment', $comment);
         $this->set('foreignKey', $foreignKey);
         $this->set('model', $model);
@@ -88,6 +83,7 @@ class CommentsCell extends Cell
      *
      * @param $commentId
      * @param $userId
+     * @todo implement at some future time perhaps
      */
     public function editComment($comment, $userId, $redirectUrl)
     {

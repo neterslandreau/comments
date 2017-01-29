@@ -13,7 +13,7 @@
     <div>
         &nbsp;<?= $this->Time->timeAgoInWords($item->created) ?>
     </div>
-    <?php if ($commentsModel->isOwnedBy($item->id, $this->request->session()->read('Auth.User.id'))) : ?>
+    <?php /* if ($commentsModel->isOwnedBy($item->id, $this->request->session()->read('Auth.User.id'))) : */?>
     <!--<div class="actions" style="border: 1px solid #000;">-->
         <?php /*
                  echo $this->cell('Comments.Comments::editComment', [
@@ -23,5 +23,5 @@
                 ])->render('editComment');
         */ ?>
     <!--</div>-->
-    <?php endif; ?>
+    <?php /* endif; */?>
 </div>
