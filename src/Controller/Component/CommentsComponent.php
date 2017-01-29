@@ -7,26 +7,13 @@ use Cake\ORM\TableRegistry;
 use Cake\Utility\Inflector;
 use Cake\Event\Event;
 use Cake\Controller\Exception\MissingActionException;
+use Cake\Core\Configure;
 
 /**
  * Comments component
  */
 class CommentsComponent extends Component
 {
-
-    /**
-     * Enabled
-     *
-     * @var boolean $enabled
-     */
-    public $active = true;
-
-    /**
-     * Controller
-     *
-     * @var mixed $controller
-     */
-    public $Controller = null;
 
     /**
      * Actions used for deleting of some model record, which doesn't use SoftDelete
@@ -40,53 +27,6 @@ class CommentsComponent extends Component
      * @var array $deleteActions
      */
     public $deleteActions = [];
-
-    /**
-     * Name of 'commentable' model
-     *
-     * Customizable in beforeFilter(), or default controller's model name is used
-     *
-     * @var string Model name
-     */
-    public $modelName = null;
-
-    /**
-     * Name of user model associated to comment
-     *
-     * Customizable in beforeFilter()
-     *
-     * @var string Name of the user model
-     */
-    public $userModel = 'Users';
-
-    /**
-     * Class Name for user model in ClassRegistry format.
-     * Ex: For User model stored in User plugin need to use Users.User
-     *
-     * Customizable in beforeFilter()
-     *
-     * @var string user model class name
-     */
-    public $userModelClass = 'Users.Users';
-
-    /**
-     * Flag if this component should permanently unbind association to Comment model in order to not
-     * query model for not necessary data in Controller::view() action
-     *
-     * Customizable in beforeFilter()
-     *
-     * @var boolean
-     */
-    public $unbindAssoc = true;
-
-    /**
-     * Flag to allow anonymous user make comments
-     *
-     * Customizable in beforeFilter()
-     *
-     * @var boolean
-     */
-    public $allowAnonymousComment = false;
 
     /**
      * Constructor.
@@ -112,28 +52,14 @@ class CommentsComponent extends Component
      */
     public function initialize(array $config) {
         $controller = $this->_registry->getController();
-        $this->Controller = $controller;
-        if (empty($this->Cookie) && !empty($this->Controller->Cookie)) {
-            $this->Cookie = $this->Controller->Cookie;
-        }
-        if (empty($this->Session) && !empty($this->Controller->Session)) {
-            $this->Session = $this->Controller->Session;
-        }
-        if (empty($this->Auth) && !empty($this->Controller->Auth)) {
-            $this->Auth = $this->Controller->Auth;
-        }
-
         $model = TableRegistry::get($controller->modelClass);
-        $this->modelName = $controller->modelClass;
-        $this->modelAlias = $model->alias();
-        $this->viewVariable = strtolower(Inflector::singularize($this->modelName));
         $loadedBehaviors = $model->behaviors()->loaded();
 
         if (!in_array('Commentable', $loadedBehaviors)) {
             $model->addBehavior('Comments.Commentable', [
-                'userModelAlias' => $this->userModel,
-                'userModelClass' => $this->userModelClass,
-                'modelName' => $this->modelName
+                'userModelAlias' => Configure::read('Comments.usersAlias'),
+                'userModelClass' => Configure::read('Comments.usersClass'),
+                'modelName' => $controller->modelClass,
             ]);
         }
     }
@@ -144,24 +70,9 @@ class CommentsComponent extends Component
      * @param Event $event
      */
     public function startup(Event $event) {
-        $model = TableRegistry::get($event->subject()->modelClass);
-        $this->Controller = $event->subject();
-        if (!$this->active) {
-            return;
-        }
-
-        $this->Auth = $this->Controller->Auth;
-        if (!empty($this->Auth) && $this->Auth->user()) {
-            $event->subject()->set('isAuthorized', ($this->Auth->user('id') != ''));
-        }
 
         if (in_array($event->subject()->request->action, $this->deleteActions)) {
             // add your softdelete behavior stuff here
-        } elseif ($this->unbindAssoc) {
-            $matches = $model->associations()->type('HasMany', 'HasOne');
-            foreach ($matches as $match) {
-                $model->associations()->remove($match->name());
-            }
         }
     }
 
@@ -169,6 +80,7 @@ class CommentsComponent extends Component
      * Generate permalink to page
      *
      * @return string URL to the comment
+     * @deprecated unused only kept as reminder
      */
     public function permalink() {
         $params = array();
@@ -199,6 +111,7 @@ class CommentsComponent extends Component
      * @param array  $args
      * @throws MissingActionException
      * @return mixed
+     * @deprecated
      */
     protected function _call($method, $args = array()) {
 //        debug($method);
