@@ -2,7 +2,6 @@
 namespace Comments\Model\Behavior;
 
 use Cake\ORM\Behavior;
-use Cake\ORM\Table;
 use Cake\ORM\TableRegistry;
 use Comments\Model\Entity\Comment;
 /**
@@ -10,37 +9,35 @@ use Comments\Model\Entity\Comment;
  */
 class CommentableBehavior extends Behavior
 {
-    /**
-     * Settings array
-     *
-     * @var array
-     */
-    public $settings = array();
-    /**
-     * Default settings
-     *
-     * @var array
-     */
-    public $defaults = array(
-        'commentModel' => 'Comments.Comments',
-        'spamField' => 'is_spam',
-        'userModelAlias' => 'Users',
-        'userModelClass' => 'Users',
-        'userModel' => null,
-    );
 
     /**
      * @var array
      */
-    public $definedActions = [
-        'clean',
-        'ham',
-        'spam',
-        'deleteCommentOnly',
-        'approve',
-        'disapprove',
+    protected $_defaultConfig = [
+        'implementedMethods' => [
+            'commentProcess' => 'process',
+        ],
+        'modelDefaults' => [
+            'commentModel' => 'Comments.Comments',
+            'spamField' => 'is_spam',
+            'userModelAlias' => 'Users',
+            'userModelClass' => 'Users',
+            'userModel' => null,
+        ],
+        'definedActions' => [
+            'clean',
+            'ham',
+            'spam',
+            'deleteCommentOnly',
+            'approve',
+            'disapprove',
+        ],
+        'settings' => [],
     ];
 
+    /**
+     * @var null
+     */
     public $model = null;
 
     /**
@@ -51,14 +48,12 @@ class CommentableBehavior extends Behavior
     public function initialize(array $config)
     {
         parent::initialize($config);
-        $model = TableRegistry::get($config['modelName']);
+        $this->model = TableRegistry::get($config['modelName']);
 
-        if (!isset($this->settings[$model->alias()])) {
-            $this->settings[$model->alias()] = $this->defaults;
+        if (!isset($this->_defaultConfig['settings'][$this->model->alias()])) {
+            $this->_defaultConfig['settings'][$this->model->alias()] = $this->_defaultConfig['modelDefaults'];
         }
-        $this->settings[$model->alias()] = array_merge($this->settings[$model->alias()], $config);
-
-        $this->model = $model;
+        $this->_defaultConfig['settings'][$this->model->alias()] = array_merge($this->_defaultConfig['settings'][$this->model->alias()], $config);
     }
 
     /**
@@ -72,13 +67,13 @@ class CommentableBehavior extends Behavior
     {
         $treeBehavior = false;
         $message = ['type' => 'error', 'body' => 'No comments were processed', 'count' => 0];
-        if (!(in_array($action, $this->definedActions))) {
+        if (!(in_array($action, $this->_defaultConfig['definedActions']))) {
             $message = [
                 'body' => 'This action is not defined.'
             ];
             return $message;
         }
-        $message['body'] = '';
+        $message['body'] = 'Yay!';
         foreach ($items as $item => $act) {
             $act = (bool)($act);
             if ($act) {

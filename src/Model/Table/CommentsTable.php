@@ -74,7 +74,7 @@ class CommentsTable extends Table
             'unique' => true,
             'conditions' => true,
             'fields' => '',
-            'dependent' => true,
+            'dependent' => false,
             'order' => '',
             'limit' => '',
             'offset' => '',
