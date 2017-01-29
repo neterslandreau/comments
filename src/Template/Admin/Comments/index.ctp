@@ -3,19 +3,34 @@
 <ul class="side-nav">
     <li class="heading">Bulk Actions</li>
     <li>
-        <?= $this->Html->link(__d('comments', 'No filter'),
-            ['action' => 'index']
+        <?= $this->Form->postLink(__d('comments', 'No filter'),
+            ['action' => 'index'],
+            ['data' => ['filterFlag' => '']]
         );?>
     </li>
     <li>
-        <?= $this->Html->link(__d('comments', 'Filter spam comments'),
-            ['action' => 'index', 'spam']
+        <?= $this->Form->postLink(__d('comments', 'Filter spam comments'),
+            ['action' => 'index'],
+            ['data' => ['filterFlag' => 'spam']]
         );?>
     </li>
     <li>
-        <?= $this->Html->link(__d('comments', 'Filter good comments'),
-            ['action' => 'index', 'clean']
+        <?= $this->Form->postLink(__d('comments', 'Filter good comments'),
+            ['action' => 'index'],
+            ['data' => ['filterFlag' => 'clean']]
         );?>
+    </li>
+    <li>
+        <?= $this->Form->postLink(__d('comments', 'Display Type: Threaded'),
+            ['action' => 'index'],
+            ['data' => ['displayType' => 'threaded']]
+        ); ?>
+    </li>
+    <li>
+        <?= $this->Form->postLink(__d('comments', 'Display Type: Flat'),
+            ['action' => 'index'],
+            ['data' => ['displayType' => 'all']]
+        ); ?>
     </li>
 </ul>
     <?php
@@ -41,14 +56,17 @@
     <?= $this->Form->submit('Process');?>
 </nav>
 <div class="comments view large-10 medium-9 columns content">
-    <h3><?= __('Comments') ?></h3>
+    <h3><?= __d('comments', ($displayType === 'threaded') ? 'Comments: Threaded View' : 'Comments: Flat View') ?></h3>
 <table cellpadding="0" cellspacing="0">
     <tr>
         <th><?= $this->Paginator->sort('name');?></th>
         <th> Body </th>
         <th><?= $this->Paginator->sort('author_name');?></th>
         <th><?= $this->Paginator->sort('author_email');?></th>
-        <th><?= $this->Paginator->sort('author_url');?></th>
+        <?php if ($displayType === 'threaded') : ?>
+        <th><?= __d('comments', 'Children') ?></th>
+        <?php endif; ?>
+        <!--<th><?= $this->Paginator->sort('author_url');?></th>-->
         <th><?= $this->Paginator->sort('created');?></th>
         <th><?= $this->Paginator->sort('is_spam');?></th>
         <th><?= $this->Paginator->sort('approved');?></th>
@@ -71,9 +89,20 @@
     <td>
         <?= h($comment->author_email); ?>
     </td>
+    <?php if ($displayType === 'threaded') : ?>
     <td>
-        <?= h($comment->author_url); ?>
+        <?php if ($comment->children) : ?>
+        <?php foreach ($comment->children as $c => $child) : ?>
+        <?= ($child->title) ? $child->title : $child->body; ?>
+        <?= $this->Form->input($child->id, ['label' => false, 'div' => false, 'class' => 'cbox', 'type' => 'checkbox']);?>
+        <?php endforeach; ?>
+        <?php endif; ?>
     </td>
+    <?php endif; ?>
+    </td>
+    <!--<td>-->
+        <!--<?= h($comment->author_url); ?>-->
+    <!--</td>-->
     <td>
         <?= $comment->created; ?>
     </td>

@@ -3,6 +3,8 @@ namespace Comments\Controller\Admin;
 
 use Comments\Controller\AppController;
 use Cake\ORM\TableRegistry;
+use Cake\Core\Configure;
+use Cake\Event\Event;
 
 class CommentsController extends AppController
 {
@@ -20,18 +22,25 @@ class CommentsController extends AppController
      */
     public $helpers = array(
         'Text',
-        'Time'
+        'Time',
     );
 
     /**
-     * Preset for search views
+     * filterFlag
      *
-     * @var array
+     * @var null
      */
-    public $presetVars = array();
+    public $filterFlag = null;
 
     /**
+     * displayType
      *
+     * @var null
+     */
+    public $displayType = null;
+
+    /**
+     * Initialize
      */
     public function initialize()
     {
@@ -43,29 +52,48 @@ class CommentsController extends AppController
     }
 
     /**
+     * beforeFilter
+     *
+     * @param Event $event
+     */
+    public function beforeFilter(Event $event)
+    {
+        $this->filterFlag = ($this->request->session()->check('Comments.Admin.filterFlag')) ? $this->request->session()->read('Comments.Admin.filterFlag') : '';
+        $this->displayType = ($this->request->session()->check('Comments.Admin.displayType')) ? $this->request->session()->read('Comments.Admin.displayType') : 'all';
+    }
+
+    /**
      * Admin index action
      *
-     * @param string
      * @return void
      */
-    public function index($type = '') {
-        $this->request->session()->write('Comments.filterFlag', $type);
-        if ($type == 'spam') {
-            $comments = $this->Comments->find()
+    public function index() {
+        if ($this->request->is('post')) {
+            $this->displayType = (isset($_REQUEST['displayType'])) ? $_REQUEST['displayType'] : $this->displayType;
+            $this->filterFlag = (isset($_REQUEST['filterFlag'])) ? $_REQUEST['filterFlag'] : $this->filterFlag;
+            $this->request->session()->write('Comments.Admin.filterFlag', $this->filterFlag);
+            $this->request->session()->write('Comments.Admin.displayType', $this->displayType);
+        }
+
+        $this->request->session()->write('Comments.Admin.filterFlag', $this->filterFlag);
+        if ($this->filterFlag == 'spam') {
+            $comments = $this->Comments->find($this->displayType)
                 ->contain(['Users'])
                 ->where(['is_spam' => 'spam'])
                 ->orWhere(['is_spam' => 'spammanual']);
-        } elseif ($type == 'clean') {
-            $comments = $this->Comments->find()
+        } elseif ($this->filterFlag == 'clean') {
+            $comments = $this->Comments->find($this->displayType)
                 ->contain(['Users'])
                 ->where(['is_spam' => 'clean'])
                 ->orWhere(['is_spam' => 'ham']);
         } else {
-            $comments = $this->Comments->find()
+            $comments = $this->Comments->find($this->displayType)
                 ->contain(['Users']);
         }
+
         $comments = $this->paginate($comments);
-        $this->set('filter', $type);
+        $this->set('filterFlag', $this->filterFlag);
+        $this->set('displayType', $this->displayType);
         $this->set(compact('comments'));
         $this->set('_serialize', ['comments']);
     }
@@ -116,6 +144,7 @@ class CommentsController extends AppController
      * Checks if the CakeDC Search plugin is present and if yes loads the PRG component
      *
      * @return array Conditions for the pagination
+     * @todo implement this feature
      */
     protected function _adminIndexSearch() {
         debug('here');
@@ -143,15 +172,13 @@ class CommentsController extends AppController
     public function process($action = null, $id = null) {
         $this->autoRender = false;
         if (empty($this->request->data)) {
-            $message = $this->Comments->process($action, [$id => 1]);
+            $message = $this->Comments->commentProcess($action, [$id => 1]);
         } else {
             $action = array_shift($this->request->data);
-            $message = $this->Comments->process($action, $this->request->data);
+            $message = $this->Comments->commentProcess($action, $this->request->data);
         }
-        debug($message);
         $this->Flash->{$message['type']}($message['body']);
-        $filterFlag = $this->request->session()->read('Comments.filterFlag');
-        $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index', $filterFlag);
+        $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index');
         $this->redirect($url);
     }
 }
