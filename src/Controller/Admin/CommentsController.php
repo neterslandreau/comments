@@ -49,15 +49,6 @@ class CommentsController extends AppController
         $this->loadComponent('Paginator');
         $this->loadComponent('Comments.Comments');
         $this->Comments = TableRegistry::get($this->modelClass);
-    }
-
-    /**
-     * beforeFilter
-     *
-     * @param Event $event
-     */
-    public function beforeFilter(Event $event)
-    {
         $this->filterFlag = ($this->request->session()->check('Comments.Admin.filterFlag')) ? $this->request->session()->read('Comments.Admin.filterFlag') : '';
         $this->displayType = ($this->request->session()->check('Comments.Admin.displayType')) ? $this->request->session()->read('Comments.Admin.displayType') : 'all';
     }
