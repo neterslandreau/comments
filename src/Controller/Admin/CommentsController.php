@@ -69,8 +69,8 @@ class CommentsController extends AppController
      */
     public function index() {
         if ($this->request->is('post')) {
-            $this->displayType = (isset($_REQUEST['displayType'])) ? $_REQUEST['displayType'] : $this->displayType;
-            $this->filterFlag = (isset($_REQUEST['filterFlag'])) ? $_REQUEST['filterFlag'] : $this->filterFlag;
+            $this->displayType = (isset($this->request->data['displayType'])) ? $this->request->data['displayType'] : $this->displayType;
+            $this->filterFlag = (isset($this->request->data['filterFlag'])) ? $this->request->data['filterFlag'] : $this->filterFlag;
             $this->request->session()->write('Comments.Admin.filterFlag', $this->filterFlag);
             $this->request->session()->write('Comments.Admin.displayType', $this->displayType);
         }
