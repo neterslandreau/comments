@@ -50,7 +50,7 @@ class CommentsTable extends Table
             'unique' => true,
             'conditions' => '',
             'fields' => '',
-            'counterCache' => true,
+            'counterCache' => false,
             'dependent' => false
         ]);
 
