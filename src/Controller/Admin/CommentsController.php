@@ -45,9 +45,6 @@ class CommentsController extends AppController
     public function initialize()
     {
         parent::initialize();
-        $this->loadComponent('RequestHandler');
-        $this->loadComponent('Paginator');
-        $this->loadComponent('Comments.Comments');
         $this->Comments = TableRegistry::get($this->modelClass);
         $this->filterFlag = ($this->request->session()->check('Comments.Admin.filterFlag')) ? $this->request->session()->read('Comments.Admin.filterFlag') : '';
         $this->displayType = ($this->request->session()->check('Comments.Admin.displayType')) ? $this->request->session()->read('Comments.Admin.displayType') : 'all';
@@ -132,6 +129,25 @@ class CommentsController extends AppController
     }
 
     /**
+     * Processes mailbox folders
+     *
+     * @param string $folder Name of the folder to process
+     * @return void
+     */
+    public function process($action = null, $id = null) {
+        $this->autoRender = false;
+        if (empty($this->request->data)) {
+            $message = $this->Comments->commentProcess($action, [$id => 1]);
+        } else {
+            $action = array_shift($this->request->data);
+            $message = $this->Comments->commentProcess($action, $this->request->data);
+        }
+        $this->Flash->{$message['type']}($message['body']);
+        $url = ['prefix' => 'admin', 'plugin' => 'Comments', 'controller' => 'Comments', 'action' => 'index'];
+        $this->redirect($url);
+    }
+
+    /**
      * Checks if the CakeDC Search plugin is present and if yes loads the PRG component
      *
      * @return array Conditions for the pagination
@@ -154,22 +170,4 @@ class CommentsController extends AppController
         return $conditions;
     }
 
-    /**
-     * Processes mailbox folders
-     *
-     * @param string $folder Name of the folder to process
-     * @return void
-     */
-    public function process($action = null, $id = null) {
-        $this->autoRender = false;
-        if (empty($this->request->data)) {
-            $message = $this->Comments->commentProcess($action, [$id => 1]);
-        } else {
-            $action = array_shift($this->request->data);
-            $message = $this->Comments->commentProcess($action, $this->request->data);
-        }
-        $this->Flash->{$message['type']}($message['body']);
-        $url = array('prefix' => 'admin', 'plugin' => 'comments', 'action' => 'index');
-        $this->redirect($url);
-    }
 }

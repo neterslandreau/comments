@@ -49,26 +49,11 @@ class CommentsController extends AppController
     public $presetVars = array();
 
     /**
-     * @param Event $event
-     */
-    public function beforeFilter(Event $event)
-    {
-    }
-
-    /**
-     * @param Event $event
-     */
-    public function beforeRender(Event $event)
-    {
-    }
-    /**
      *
      */
     public function initialize()
     {
         parent::initialize();
-        $this->loadComponent('RequestHandler');
-        $this->loadComponent('Paginator');
         $this->Comments = TableRegistry::get($this->modelClass);
     }
 
@@ -83,23 +68,6 @@ class CommentsController extends AppController
 
         $this->set(compact('comments'));
         $this->set('_serialize', ['comments']);
-    }
-
-    /**
-     * View method
-     *
-     * @param string|null $id Comment id.
-     * @return \Cake\Network\Response|null
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function view($id = null)
-    {
-        $comment = $this->Comments->get($id, [
-            'contain' => []
-        ]);
-
-        $this->set('comment', $comment);
-        $this->set('_serialize', ['comment']);
     }
 
     /**
