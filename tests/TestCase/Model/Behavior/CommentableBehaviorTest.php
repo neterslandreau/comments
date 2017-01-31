@@ -3,8 +3,6 @@ namespace Comments\Test\TestCase\Model\Behavior;
 
 use Cake\TestSuite\TestCase;
 use Cake\ORM\TableRegistry;
-use Comments\Model\Entity\Comment;
-
 
 /**
  * Comments\Model\Behavior\CommentableBehavior Test Case
@@ -13,12 +11,10 @@ class CommentableBehaviorTest extends TestCase
 {
 
     /**
-     * Test subject
+     * Fixtures
      *
-     * @var \Comments\Model\Behavior\CommentableBehavior
+     * @var array
      */
-    public $CommentableBehavior;
-
     public $fixtures = [
         'plugin.Comments.Comments',
         'plugin.Comments.Users',
@@ -60,7 +56,7 @@ class CommentableBehaviorTest extends TestCase
         $action = 'ham';
         $items = [
             '00000000-0000-0000-0000-000000000001' => '1',
-            '00000000-0000-0000-0000-000000000002' => '1',
+            '00000000-0000-0000-0000-000000000002' => '0',
             '00000000-0000-0000-0000-000000000003' => '1',
         ];
         $results = $this->Comments->commentProcess($action, $items);
