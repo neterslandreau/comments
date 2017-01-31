@@ -56,7 +56,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000004',
             'parent_id' => '00000000-0000-0000-0000-000000000001',
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => '0c2b4704-f5ea-440a-b3b1-1c8450b49a9f',
             'lft' => 12,
             'rght' => 13,
@@ -78,7 +78,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000005',
             'parent_id' => null,
-            'foreign_key' => '65fe2163-cc73-44b4-890a-0d91a21e51ec',
+            'foreign_key' => '00000000-0000-0000-0000-000000000002',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 29,
             'rght' => 30,
@@ -100,7 +100,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000006',
             'parent_id' => '00000000-0000-0000-0000-000000000001',
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => '0c2b4704-f5ea-440a-b3b1-1c8450b49a9f',
             'lft' => 14,
             'rght' => 15,
@@ -122,7 +122,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000007',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 45,
             'rght' => 46,
@@ -144,7 +144,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000008',
             'parent_id' => null,
-            'foreign_key' => '2f706520-3808-4bca-9415-1c5ab513dd92',
+            'foreign_key' => '00000000-0000-0000-0000-000000000003',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 5,
             'rght' => 6,
@@ -166,7 +166,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000009',
             'parent_id' => null,
-            'foreign_key' => '27f1e929-08d9-41db-8f22-e67fc516003e',
+            'foreign_key' => '00000000-0000-0000-0000-000000000004',
             'user_id' => '0c2b4704-f5ea-440a-b3b1-1c8450b49a9f',
             'lft' => 53,
             'rght' => 54,
@@ -188,7 +188,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000001',
             'parent_id' => null,
-            'foreign_key' => '6424c089-98c3-4274-986b-0026e0ff420b',
+            'foreign_key' => '00000000-0000-0000-0000-000000000005',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 9,
             'rght' => 16,
@@ -210,7 +210,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000010',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 43,
             'rght' => 44,
@@ -232,7 +232,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000011',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 33,
             'rght' => 34,
@@ -254,7 +254,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000002',
             'parent_id' => null,
-            'foreign_key' => '9ed1bb94-301b-4afd-a63e-1c099003ced4',
+            'foreign_key' => '00000000-0000-0000-0000-000000000006',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 17,
             'rght' => 20,
@@ -276,7 +276,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000012',
             'parent_id' => null,
-            'foreign_key' => 'b43126cf-a2a8-41ca-8f74-6dc0d66e95e5',
+            'foreign_key' => '00000000-0000-0000-0000-000000000007',
             'user_id' => 'f5b2282f-439a-42ab-b357-8362ef4422af',
             'lft' => 27,
             'rght' => 28,
@@ -298,7 +298,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000013',
             'parent_id' => '00000000-0000-0000-0000-000000000002',
-            'foreign_key' => '9ed1bb94-301b-4afd-a63e-1c099003ced4',
+            'foreign_key' => '00000000-0000-0000-0000-000000000006',
             'user_id' => 'f5b2282f-439a-42ab-b357-8362ef4422af',
             'lft' => 18,
             'rght' => 19,
@@ -320,7 +320,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000014',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 51,
             'rght' => 52,
@@ -342,7 +342,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000015',
             'parent_id' => '00000000-0000-0000-0000-000000000001',
-            'foreign_key' => '6424c089-98c3-4274-986b-0026e0ff420b',
+            'foreign_key' => '00000000-0000-0000-0000-000000000005',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 10,
             'rght' => 11,
@@ -364,7 +364,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000016',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 31,
             'rght' => 32,
@@ -386,7 +386,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000017',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 39,
             'rght' => 40,
@@ -408,7 +408,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000018',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 47,
             'rght' => 48,
@@ -430,7 +430,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000019',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 41,
             'rght' => 42,
@@ -452,7 +452,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000020',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 37,
             'rght' => 38,
@@ -474,7 +474,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000021',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 49,
             'rght' => 50,
@@ -496,7 +496,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000022',
             'parent_id' => null,
-            'foreign_key' => '254feba8-5712-4d66-aed7-07350955acbb',
+            'foreign_key' => '00000000-0000-0000-0000-000000000008',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 3,
             'rght' => 4,
@@ -518,7 +518,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000023',
             'parent_id' => null,
-            'foreign_key' => '5bf9d02a-4e8a-4d10-81d8-ac1d7fd45ead',
+            'foreign_key' => '00000000-0000-0000-0000-000000000010',
             'user_id' => '0c2b4704-f5ea-440a-b3b1-1c8450b49a9f',
             'lft' => 55,
             'rght' => 56,
@@ -540,7 +540,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000024',
             'parent_id' => '00000000-0000-0000-0000-000000000003',
-            'foreign_key' => 'c8669411-4c58-4da1-ae6c-58b6ee667101',
+            'foreign_key' => '00000000-0000-0000-0000-000000000009',
             'user_id' => 'f5b2282f-439a-42ab-b357-8362ef4422af',
             'lft' => 22,
             'rght' => 23,
@@ -562,7 +562,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000025',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'f5b2282f-439a-42ab-b357-8362ef4422af',
             'lft' => 25,
             'rght' => 26,
@@ -584,7 +584,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000026',
             'parent_id' => null,
-            'foreign_key' => '254feba8-5712-4d66-aed7-07350955acbb',
+            'foreign_key' => '00000000-0000-0000-0000-000000000008',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 1,
             'rght' => 2,
@@ -606,7 +606,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000027',
             'parent_id' => null,
-            'foreign_key' => '2f706520-3808-4bca-9415-1c5ab513dd92',
+            'foreign_key' => '00000000-0000-0000-0000-000000000003',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 7,
             'rght' => 8,
@@ -628,7 +628,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000003',
             'parent_id' => null,
-            'foreign_key' => 'c8669411-4c58-4da1-ae6c-58b6ee667101',
+            'foreign_key' => '00000000-0000-0000-0000-000000000009',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 21,
             'rght' => 24,
@@ -650,7 +650,7 @@ class CommentsFixture extends TestFixture
         [
             'id' => '00000000-0000-0000-0000-000000000028',
             'parent_id' => null,
-            'foreign_key' => '0d44e67a-6329-47ab-b4a3-d5f3851a2b38',
+            'foreign_key' => '00000000-0000-0000-0000-000000000001',
             'user_id' => 'b3e4fd4f-21e0-4c10-9611-6538bca53add',
             'lft' => 35,
             'rght' => 36,

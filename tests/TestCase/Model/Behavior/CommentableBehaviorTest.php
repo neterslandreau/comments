@@ -63,7 +63,7 @@ class CommentableBehaviorTest extends TestCase
             '00000000-0000-0000-0000-000000000002' => '1',
             '00000000-0000-0000-0000-000000000003' => '1',
         ];
-        $results = $this->Comments->process($action, $items);
+        $results = $this->Comments->commentProcess($action, $items);
         $this->assertEquals('success', $results['type']);
         $count = 0;
         foreach ($items as $item => $act) {
@@ -87,7 +87,7 @@ class CommentableBehaviorTest extends TestCase
             '00000000-0000-0000-0000-000000000002' => '0',
             '00000000-0000-0000-0000-000000000003' => '1',
         ];
-        $results = $this->Comments->process($action, $items);
+        $results = $this->Comments->commentProcess($action, $items);
         $this->assertEquals('success', $results['type']);
         $count = 0;
         foreach ($items as $item => $act) {
@@ -111,7 +111,7 @@ class CommentableBehaviorTest extends TestCase
             '00000000-0000-0000-0000-000000000002' => '0',
             '00000000-0000-0000-0000-000000000003' => '1',
         ];
-        $results = $this->Comments->process($action, $items);
+        $results = $this->Comments->commentProcess($action, $items);
 
         $this->assertEquals('success', $results['type']);
         $count = 0;
@@ -136,7 +136,7 @@ class CommentableBehaviorTest extends TestCase
             '00000000-0000-0000-0000-000000000005' => '0',
             '00000000-0000-0000-0000-000000000006' => '1',
         ];
-        $results = $this->Comments->process($action, $items);
+        $results = $this->Comments->commentProcess($action, $items);
 
         $this->assertEquals('success', $results['type']);
         $count = 0;
@@ -162,7 +162,7 @@ class CommentableBehaviorTest extends TestCase
             '00000000-0000-0000-0000-000000000019' => '1',
         ];
         $commentsStart = $this->Comments->find()->count();
-        $results = $this->Comments->process($action, $items);
+        $results = $this->Comments->commentProcess($action, $items);
         $commentsEnd = $this->Comments->find()->count();
 
         $this->assertEquals('success', $results['type']);
